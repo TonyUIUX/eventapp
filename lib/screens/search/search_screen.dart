@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/events_provider.dart';
@@ -23,6 +24,7 @@ class SearchScreen extends ConsumerStatefulWidget {
 class _SearchScreenState extends ConsumerState<SearchScreen> {
   late final TextEditingController _controller;
   late final FocusNode _focusNode;
+  Timer? _debounce;
 
   // Placeholder for recent searches
   final List<String> _recentSearches = ['Music Festival', 'Tech Meetup', 'Art'];
@@ -46,6 +48,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   @override
   void dispose() {
+    _debounce?.cancel();
     ref.read(searchQueryProvider.notifier).state = '';
     _controller.dispose();
     _focusNode.dispose();
@@ -55,6 +58,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   void _removeRecentSearch(String search) {
     setState(() {
       _recentSearches.remove(search);
+    });
+  }
+
+  void _onSearch(String query) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      ref.read(searchQueryProvider.notifier).state = query;
     });
   }
 
@@ -97,7 +107,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   child: TextField(
                     controller: _controller,
                     focusNode: _focusNode,
-                    onChanged: (value) => ref.read(searchQueryProvider.notifier).state = value,
+                    onChanged: _onSearch,
                     style: AppTextStyles.body.copyWith(color: AppColors.textPrimary),
                     decoration: InputDecoration(
                       hintText: 'Events, places, tags...',

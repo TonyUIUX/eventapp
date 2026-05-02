@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -26,6 +27,14 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    statusBarIconBrightness: Brightness.light,  // white icons for dark bg
+    systemNavigationBarColor: AppColors.backgroundBase,
+    systemNavigationBarIconBrightness: Brightness.light,
+  ));
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
   // Enable Firestore offline persistence (Settings API — works on web + mobile).
   FirebaseFirestore.instance.settings = const Settings(

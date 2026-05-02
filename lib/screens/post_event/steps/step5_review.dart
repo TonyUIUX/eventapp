@@ -7,6 +7,7 @@ import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../providers/app_config_provider.dart';
 import '../../../../core/widgets/gradient_button.dart';
+import '../../../../core/widgets/dark_shimmer.dart';
 
 class Step5Review extends ConsumerWidget {
   final PostEventFormData formData;
@@ -98,24 +99,31 @@ class Step5Review extends ConsumerWidget {
                   const _TermBullet(text: 'Moderation takes up to 24 hours.'),
                   if (!config.requiresPayment)
                     _TermBullet(text: config.freePeriodReason, isItalic: true),
-                  
-                  const SizedBox(height: 48),
-                  
-                  // Submit Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: GradientButton(
-                      label: config.requiresPayment ? 'Pay & Submit' : 'Submit for Review',
-                      isLoading: isSubmitting,
-                      height: 56,
-                      onTap: isSubmitting ? () {} : onConfirm,
-                    ),
-                  ),
                 ],
               );
             },
-            loading: () => const Center(child: CircularProgressIndicator(color: AppColors.brandCoral)),
+            loading: () => Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('PUBLISHING FEE', style: AppTextStyles.caption.copyWith(color: AppColors.brandCoral)),
+                const SizedBox(height: 12),
+                const DarkShimmer(width: double.infinity, height: 80, borderRadius: AppRadius.lg),
+              ],
+            ),
             error: (_, __) => Text('Error loading platform config', style: AppTextStyles.body.copyWith(color: AppColors.error)),
+          ),
+          
+          const SizedBox(height: 48),
+          
+          // Submit Button
+          SizedBox(
+            width: double.infinity,
+            child: GradientButton(
+              label: configAsync.valueOrNull?.requiresPayment == true ? 'Pay & Submit' : 'Submit for Review',
+              isLoading: isSubmitting,
+              height: 56,
+              onTap: isSubmitting || configAsync.isLoading ? () {} : onConfirm,
+            ),
           ),
           
           const SizedBox(height: 48), // Bottom padding

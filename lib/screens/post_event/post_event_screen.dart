@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/payment_service.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
@@ -50,7 +51,40 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
   }
 
   Future<void> _initDraft() async {
-    await _formData.loadDraft();
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.containsKey(PostEventFormData.draftKey)) {
+      if (mounted) {
+        final restore = await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            backgroundColor: AppColors.backgroundSheet,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadius.xl),
+              side: const BorderSide(color: AppColors.glassBorder),
+            ),
+            title: Text('Continue Draft?', style: AppTextStyles.heading2.copyWith(color: Colors.white)),
+            content: Text('You have an unsaved event draft. Would you like to continue?', style: AppTextStyles.body.copyWith(color: AppColors.textSecondary)),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  _formData.clearDraft();
+                  Navigator.pop(context, false);
+                },
+                child: Text('Discard', style: AppTextStyles.label.copyWith(color: AppColors.error)),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: Text('Yes', style: AppTextStyles.label.copyWith(color: Colors.white)),
+              ),
+            ],
+          ),
+        );
+        if (restore == true) {
+          await _formData.loadDraft();
+        }
+      }
+    }
     if (mounted) {
       setState(() => _isDraftLoaded = true);
     }
@@ -276,7 +310,7 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
                     child: GradientButton(
                       label: 'Continue',
                       height: 56,
-                      onTap: _isStepValid() ? _nextStep : () {},
+                      onTap: _handleNextStep,
                     ),
                   ),
                 )
@@ -286,13 +320,58 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
     );          // closes AuthGate
   }
 
-  bool _isStepValid() {
+  void _handleNextStep() {
+    String? error;
     switch (_currentStep) {
-      case 0: return _formData.title.isNotEmpty && _formData.category.isNotEmpty;
-      case 1: return _formData.date != null && _formData.location.isNotEmpty;
-      case 2: return _formData.images.isNotEmpty;
-      case 3: return _formData.organizer.isNotEmpty;
-      default: return true;
+      case 0:
+        if (_formData.title.length < 5 || _formData.title.length > 80) {
+          error = 'Title must be 5-80 characters.';
+        } else if (_formData.category.isEmpty) {
+          error = 'Please select a category.';
+        } else if (_formData.date == null) {
+          error = 'Please select a date.';
+        } else if (_formData.date!.isBefore(DateTime.now().subtract(const Duration(days: 1)))) {
+          error = 'Select a future date.';
+        }
+        break;
+      case 1:
+        if (_formData.description.length < 50 || _formData.description.length > 1000) {
+          error = 'Description must be 50-1000 characters.';
+        } else if (_formData.location.isEmpty) {
+          error = 'Please enter a venue location.';
+        } else if (_formData.mapLink != null && _formData.mapLink!.isNotEmpty && !_formData.mapLink!.startsWith('https://')) {
+          error = 'Map link must start with https://';
+        } else if (_formData.ticketLink != null && _formData.ticketLink!.isNotEmpty && !_formData.ticketLink!.startsWith('http')) {
+          error = 'Ticket link must be a valid URL starting with http.';
+        } else if (_formData.registrationLink != null && _formData.registrationLink!.isNotEmpty && !_formData.registrationLink!.startsWith('http')) {
+          error = 'Registration link must be a valid URL starting with http.';
+        }
+        break;
+      case 2:
+        if (_formData.images.isEmpty) {
+          error = 'Please add at least one image.';
+        }
+        break;
+      case 3:
+        if (_formData.organizer.isEmpty) {
+          error = 'Please enter an organizer name.';
+        } else if (_formData.contactPhone != null && _formData.contactPhone!.isNotEmpty && !RegExp(r'^\d{10}$').hasMatch(_formData.contactPhone!)) {
+          error = 'Phone must be exactly 10 digits.';
+        }
+        break;
+    }
+
+    if (error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error, style: const TextStyle(color: Colors.white)),
+          backgroundColor: AppColors.backgroundCard,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: AppColors.glassBorder)),
+        ),
+      );
+    } else {
+      _nextStep();
     }
   }
 }
