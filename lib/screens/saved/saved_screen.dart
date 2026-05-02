@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/saved_events_provider.dart';
+import '../../providers/events_provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
-import '../../core/constants/app_constants.dart';
+import '../../core/constants/app_spacing.dart';
+import '../../core/widgets/staggered_list.dart';
+import '../../core/widgets/gradient_button.dart';
 import '../home/widgets/event_card.dart';
 
-// Shows the user's saved/bookmarked events
+// lib/screens/saved/saved_screen.dart
+// Dark glassmorphism Saved Screen — KochiGo v3.1
+
 class SavedScreen extends ConsumerWidget {
   const SavedScreen({super.key});
 
@@ -15,29 +20,44 @@ class SavedScreen extends ConsumerWidget {
     final savedAsync = ref.watch(savedEventsProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.backgroundBase,
       appBar: AppBar(
-        title: const Text('Saved Events'),
-        backgroundColor: AppColors.surface,
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: AppColors.border),
+        scrolledUnderElevation: 0,
+        centerTitle: true,
+        title: Text(
+          'Saved Events',
+          style: AppTextStyles.heading2.copyWith(color: Colors.white),
         ),
       ),
       body: savedAsync.when(
         data: (events) => events.isEmpty
             ? const _EmptySaved()
-            : ListView.builder(
-                itemCount: events.length,
-                itemBuilder: (context, index) {
-                  final event = events[index];
-                  return EventCard(event: event);
-                },
+            : CustomScrollView(
+                physics: const BouncingScrollPhysics(),
+                slivers: [
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) => StaggeredListItem(
+                          index: index,
+                          maxStagger: 6,
+                          child: EventCard(event: events[index]),
+                        ),
+                        childCount: events.length,
+                      ),
+                    ),
+                  ),
+                  const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxl)),
+                ],
               ),
-        loading: () => const Center(child: CircularProgressIndicator(color: AppColors.brandCoral)),
-        error: (e, _) => const Center(
-          child: Text('Something went wrong', style: AppTextStyles.bodySecondary),
+        loading: () => const Center(
+          child: CircularProgressIndicator(color: AppColors.brandCoral),
+        ),
+        error: (e, _) => _ErrorState(
+          onRetry: () => ref.invalidate(eventsProvider),
         ),
       ),
     );
@@ -49,20 +69,57 @@ class _EmptySaved extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.bookmark_outline, size: 64, color: AppColors.textTertiary),
-          SizedBox(height: AppSpacing.md),
-          Text('Nothing saved yet', style: AppTextStyles.heading2),
-          SizedBox(height: AppSpacing.xs),
-          Text(
-            'Tap the save button on any event to bookmark it',
-            style: AppTextStyles.bodySecondary,
-            textAlign: TextAlign.center,
-          ),
-        ],
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xxl),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('🔖', style: TextStyle(fontSize: 52)),
+            const SizedBox(height: AppSpacing.lg),
+            const Text(
+              'Nothing Saved Yet',
+              style: AppTextStyles.heading2,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              'Long-press any event card to bookmark it\nfor quick access later.',
+              style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ErrorState extends StatelessWidget {
+  final VoidCallback onRetry;
+  const _ErrorState({required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xxl),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('😵', style: TextStyle(fontSize: 52)),
+            const SizedBox(height: AppSpacing.lg),
+            const Text('Something Went Wrong', style: AppTextStyles.heading2),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              'We couldn\'t load your saved events.\nCheck your connection and try again.',
+              style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            GradientButton(label: 'Try Again', onTap: onRetry, height: 48),
+          ],
+        ),
       ),
     );
   }

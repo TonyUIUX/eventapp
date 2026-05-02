@@ -6,6 +6,7 @@ import '../../core/constants/app_text_styles.dart';
 import '../../core/constants/app_spacing.dart';
 import '../../core/widgets/tap_scale.dart';
 import '../../core/auth_gate.dart';
+import '../../core/utils/app_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/events_provider.dart';
 import '../../models/event_model.dart';
@@ -314,9 +315,26 @@ class _EventsList extends ConsumerWidget {
 
         if (filtered.isEmpty) {
           return Center(
-            child: Text(
-              'No $status events.',
-              style: AppTextStyles.body.copyWith(color: AppColors.textTertiary),
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.xl),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('📋', style: TextStyle(fontSize: 52)),
+                  const SizedBox(height: AppSpacing.md),
+                  Text(
+                    'No ${status == 'under_review' ? 'Pending' : status[0].toUpperCase() + status.substring(1)} Events',
+                    style: AppTextStyles.heading3,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    'Your $status events will appear here.',
+                    style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
           );
         }
@@ -347,7 +365,7 @@ class _MiniEventCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TapScale(
-      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => EventDetailScreen(event: event))),
+      onTap: () => Navigator.push(context, SlideUpFadeRoute(page: EventDetailScreen(event: event))),
       child: Container(
         height: 120,
         margin: const EdgeInsets.only(bottom: AppSpacing.md),

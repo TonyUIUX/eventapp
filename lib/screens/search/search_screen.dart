@@ -7,6 +7,7 @@ import '../../core/constants/app_text_styles.dart';
 import '../../core/constants/app_spacing.dart';
 import '../../core/widgets/staggered_list.dart';
 import '../../core/widgets/tap_scale.dart';
+import '../../core/widgets/gradient_button.dart';
 import '../home/widgets/event_card.dart';
 
 // lib/screens/search/search_screen.dart
@@ -169,7 +170,29 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 child: CircularProgressIndicator(color: AppColors.brandCoral),
               ),
               error: (_, __) => Center(
-                child: Text('Could not load results.', style: AppTextStyles.body.copyWith(color: AppColors.textSecondary)),
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.xxl),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('😵', style: TextStyle(fontSize: 52)),
+                      const SizedBox(height: AppSpacing.lg),
+                      const Text('Search Unavailable', style: AppTextStyles.heading3),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        'We couldn\'t load results right now.\nCheck your connection and try again.',
+                        style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: AppSpacing.xl),
+                      GradientButton(
+                        label: 'Try Again',
+                        onTap: () => ref.invalidate(eventsProvider),
+                        height: 48,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
     );

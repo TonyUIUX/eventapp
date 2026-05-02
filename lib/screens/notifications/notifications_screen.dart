@@ -4,6 +4,8 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
 import '../../core/constants/app_spacing.dart';
 import '../../core/widgets/tap_scale.dart';
+import '../../core/widgets/gradient_button.dart';
+import '../../core/utils/app_router.dart';
 import '../../providers/notification_provider.dart';
 import '../../models/notification_model.dart';
 import '../../services/notification_service.dart';
@@ -25,7 +27,9 @@ class NotificationsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.backgroundBase,
       appBar: AppBar(
-        backgroundColor: AppColors.backgroundBase,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
         title: Text('Notifications', style: AppTextStyles.heading2.copyWith(color: Colors.white)),
         centerTitle: true,
         actions: [
@@ -38,8 +42,6 @@ class NotificationsScreen extends ConsumerWidget {
               ),
             ),
         ],
-        elevation: 0,
-        scrolledUnderElevation: 0,
       ),
       body: notifsAsync.when(
         data: (notifs) {
@@ -54,7 +56,7 @@ class NotificationsScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator(color: AppColors.brandCoral)),
-        error: (e, _) => Center(child: Text('Error: $e', style: AppTextStyles.body.copyWith(color: AppColors.error))),
+        error: (e, _) => _ErrorState(onRetry: () => ref.invalidate(notificationsProvider)),
       ),
     );
   }
@@ -98,7 +100,7 @@ class _NotificationTile extends StatelessWidget {
       try {
         final event = await FirestoreService.instance.getEventById(notif.relatedId!);
         if (event != null && context.mounted) {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)));
+          Navigator.push(context, SlideUpFadeRoute(page: EventDetailScreen(event: event)));
         }
       } catch (e) {
         // Silently fail if event not found or deleted
@@ -172,19 +174,52 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text('🔔', style: TextStyle(fontSize: 64)),
-          const SizedBox(height: AppSpacing.xl),
-          Text('All caught up', style: AppTextStyles.heading2.copyWith(color: Colors.white)),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            'You have no new notifications right now.\nCheck back later!',
-            style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
-            textAlign: TextAlign.center,
-          ),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xxl),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('🔔', style: TextStyle(fontSize: 52)),
+            const SizedBox(height: AppSpacing.xl),
+            const Text('All Caught Up', style: AppTextStyles.heading2),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              'You have no new notifications right now.\nCheck back later!',
+              style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ErrorState extends StatelessWidget {
+  final VoidCallback onRetry;
+  const _ErrorState({required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xxl),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('😵', style: TextStyle(fontSize: 52)),
+            const SizedBox(height: AppSpacing.lg),
+            const Text('Connection Issue', style: AppTextStyles.heading2),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              'We couldn\'t load your notifications.\nCheck your connection and try again.',
+              style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            GradientButton(label: 'Try Again', onTap: onRetry, height: 48),
+          ],
+        ),
       ),
     );
   }
