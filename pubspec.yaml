@@ -1,0 +1,108 @@
+name: kochigo_app
+description: KochiGo — Hyper-local event discovery app for Kochi, Kerala.
+publish_to: 'none'
+version: 1.1.0+2
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Firebase
+  firebase_core: ^3.6.0
+  cloud_firestore: ^5.4.3
+  firebase_storage: ^12.3.2
+  firebase_auth: ^5.3.1
+  google_sign_in: ^6.2.1
+
+  # State Management
+  flutter_riverpod: ^2.5.1
+
+  # Local Storage
+  shared_preferences: ^2.3.2
+
+  # Network Image Caching
+  cached_network_image: ^3.4.1
+
+  # URL Launcher (for Maps & contact links)
+  url_launcher: ^6.3.0
+
+  # Date Formatting
+  intl: ^0.19.0
+
+  # Loading shimmer effect
+  shimmer: ^3.0.0
+
+  # Share events to other apps
+  share_plus: ^10.0.0
+
+  # Offline connectivity detection
+  connectivity_plus: ^6.0.0
+  in_app_review: ^2.0.11
+  firebase_analytics: ^11.6.0
+  firebase_messaging: ^15.2.10
+  flutter_local_notifications: ^21.0.0
+  app_links: ^7.0.0
+  smooth_page_indicator: ^2.0.1
+  timezone: ^0.11.0
+  razorpay_flutter: ^1.4.4
+  image_picker: ^1.2.1
+  image_cropper: ^8.0.0
+  flutter_native_splash: ^2.4.7
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.14.1
+
+# ─── App Icon Config ─────────────────────────────────────────────────────────
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: 'assets/images/app_icon.png'
+  min_sdk_android: 21
+  # Adaptive icon: coral background, same icon as foreground
+  adaptive_icon_background: '#FF5A35'
+  adaptive_icon_foreground: 'assets/images/app_icon.png'
+  web:
+    generate: false
+
+# ─── Splash Screen Config ────────────────────────────────────────────────────
+flutter_native_splash:
+  color: '#FF5A35'
+  image: 'assets/images/app_icon.png'
+  android: true
+  ios: false
+  web: true
+  fullscreen: true
+  android_gravity: center
+  # Dark mode splash
+  color_dark: '#1A1A1A'
+  image_dark: 'assets/images/app_icon.png'
+  android_12:
+    color: '#FF5A35'
+    icon_background_color: '#FF5A35'
+    image: 'assets/images/app_icon.png'
+
+# ─── Flutter section ─────────────────────────────────────────────────────────
+flutter:
+  uses-material-design: true
+
+  # Bundled Poppins font — works on Android & web without google_fonts package
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Poppins-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Poppins-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 700
+
+  assets:
+    - assets/images/

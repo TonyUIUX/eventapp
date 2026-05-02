@@ -1,0 +1,46 @@
+class AppSpacing {
+  static const double zero = 0.0;
+  static const double quat = 2.0;
+  static const double xs = 4.0;
+  static const double sm = 8.0;
+  static const double md = 16.0;
+  static const double lg = 24.0;
+  static const double xl = 32.0;
+  static const double xxl = 48.0;
+  static const double xxxl = 64.0;
+}
+
+class AppRadius {
+  static const double xs = 4.0;
+  static const double sm = 8.0;
+  static const double md = 12.0;
+  static const double lg = 16.0;
+  static const double xl = 24.0;
+  static const double xxl = 32.0;
+  static const double full = 999.0;
+}
+
+class AppCategories {
+  static const List<Map<String, String>> all = [
+    {'label': 'All', 'value': 'all', 'emoji': '✨'},
+    {'label': 'Comedy', 'value': 'comedy', 'emoji': '😂'},
+    {'label': 'Music', 'value': 'music', 'emoji': '🎵'},
+    {'label': 'Tech', 'value': 'tech', 'emoji': '💻'},
+    {'label': 'Fitness', 'value': 'fitness', 'emoji': '🏃'},
+    {'label': 'Art', 'value': 'art', 'emoji': '🎨'},
+    {'label': 'Workshop', 'value': 'workshop', 'emoji': '🛠️'},
+  ];
+}
+
+/// Convenience aliases used across the app.
+class AppConstants {
+  /// Flat list of category value strings (for PostEventScreen FilterChips).
+  static const List<String> categories = [
+    'comedy',
+    'music',
+    'tech',
+    'fitness',
+    'art',
+    'workshop',
+  ];
+}

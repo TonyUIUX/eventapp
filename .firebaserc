@@ -1,0 +1,18 @@
+{
+  "projects": {
+    "default": "kochigo-app"
+  },
+  "targets": {
+    "kochigo-app": {
+      "hosting": {
+        "admin": [
+          "kochigo-app"
+        ],
+        "main": [
+          "kochigo-main-app"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

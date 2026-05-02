@@ -1,0 +1,62 @@
+{
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "kochigo-app",
+          "appId": "1:179045522471:android:3d8d9b8cdbedd692470202",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "kochigo-app",
+          "configurations": {
+            "android": "1:179045522471:android:3d8d9b8cdbedd692470202",
+            "ios": "1:179045522471:ios:54b259690fbb3392470202",
+            "macos": "1:179045522471:ios:54b259690fbb3392470202",
+            "web": "1:179045522471:web:5975dbc706f54e95470202",
+            "windows": "1:179045522471:web:115df1947628e33c470202"
+          }
+        }
+      }
+    }
+  },
+  "hosting": [
+    {
+      "target": "admin",
+      "public": "admin_app/build/web",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
+    },
+    {
+      "target": "main",
+      "public": "build/web",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
+    }
+  ]
+}
+
