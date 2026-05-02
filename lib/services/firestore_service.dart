@@ -16,6 +16,7 @@ class FirestoreService {
         .where('isActive', isEqualTo: true)
         .where('status', isEqualTo: 'active')
         .orderBy('date', descending: false)
+        .limit(50)
         .snapshots()
         .map((snapshot) {
           return snapshot.docs.map((doc) => EventModel.fromFirestore(doc)).toList();
@@ -29,6 +30,7 @@ class FirestoreService {
         .where('isActive', isEqualTo: true)
         .where('status', isEqualTo: 'active')
         .orderBy('date', descending: false)
+        .limit(50)
         .get();
     
     return query.docs.map((doc) => EventModel.fromFirestore(doc)).toList();

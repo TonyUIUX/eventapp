@@ -127,6 +127,7 @@ class AuthService {
     final docRef = _db.collection('users').doc(uid);
 
     await docRef.set({
+      'uid': uid,
       'displayName': nameOverride ?? user.displayName ?? 'New User',
       'email': user.email,
       'phone': user.phoneNumber,

@@ -41,7 +41,7 @@ class AppConfigModel {
     this.changeLog,
   });
 
-  bool get requiresPayment => !isFreePeriod && paymentEnabled;
+  bool get requiresPayment => !isFreePeriod && paymentEnabled && postingFee > 0;
   
   bool get freePeriodEndingSoon {
     if (freePeriodEndsAt == null) return false;

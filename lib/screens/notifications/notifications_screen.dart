@@ -62,7 +62,7 @@ class NotificationsScreen extends ConsumerWidget {
   }
 }
 
-class _NotificationTile extends StatelessWidget {
+class _NotificationTile extends ConsumerWidget {
   final NotificationModel notif;
   const _NotificationTile({required this.notif});
 
@@ -93,12 +93,18 @@ class _NotificationTile extends StatelessWidget {
     return 'Just now';
   }
 
-  void _handleTap(BuildContext context) async {
+  void _handleTap(BuildContext context, WidgetRef ref) async {
     NotificationService.instance.markAsRead(notif.id);
     
     if (notif.relatedId != null && notif.relatedId!.isNotEmpty) {
       try {
-        final event = await FirestoreService.instance.getEventById(notif.relatedId!);
+        final eventsAsync = ref.read(eventsProvider);
+        EventModel? event;
+        if (eventsAsync is AsyncData) {
+          event = eventsAsync.value?.where((e) => e.id == notif.relatedId!).firstOrNull;
+        }
+        event ??= await FirestoreService.instance.getEventById(notif.relatedId!);
+        
         if (event != null && context.mounted) {
           Navigator.push(context, SlideUpFadeRoute(page: EventDetailScreen(event: event)));
         }
@@ -109,9 +115,9 @@ class _NotificationTile extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return TapScale(
-      onTap: () => _handleTap(context),
+      onTap: () => _handleTap(context, ref),
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(

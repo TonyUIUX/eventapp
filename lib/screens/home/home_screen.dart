@@ -15,6 +15,11 @@ import 'widgets/event_card.dart';
 import 'widgets/featured_carousel.dart';
 import '../search/search_screen.dart';
 import '../post_event/post_event_screen.dart';
+import '../../services/event_post_service.dart';
+import '../../models/post_event_form_data.dart';
+import '../../providers/auth_provider.dart';
+import '../../services/payment_service.dart';
+import 'package:flutter/foundation.dart';
 
 // lib/screens/home/home_screen.dart
 // Full dark glassmorphism HomeScreen — KochiGo v3.1
@@ -110,6 +115,52 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     SlideUpFadeRoute(page: const SearchScreen()),
                   ),
                 ),
+                if (kDebugMode) ...[
+                  IconButton(
+                    icon: const Icon(Icons.bug_report, color: Colors.greenAccent),
+                    onPressed: () async {
+                      final config = ref.read(appConfigProvider).valueOrNull;
+                      if (config == null) { debugPrint('Config not loaded'); return; }
+                      
+                      try {
+                        final eventId = await EventPostService.instance.createPendingEvent(
+                          eventData: (PostEventFormData()
+                            ..title = 'DEBUG TEST EVENT ${DateTime.now().millisecondsSinceEpoch}'
+                            ..category = 'tech'
+                            ..eventDate = DateTime.now().add(const Duration(days: 1))
+                            ..startTime = const TimeOfDay(hour: 18, minute: 0)
+                            ..description = 'This is a debug test event with sufficient description length for validation testing purposes.'
+                            ..location = 'Test Location, Kochi'
+                            ..organizerName = 'Debug Tester'
+                            ..entryType = 'free'
+                            ..price = 'Free')
+                            .toMap(),
+                          eventDurationDays: config.eventDurationDays,
+                          imageUrls: [],
+                        );
+                        debugPrint('✅ Event submitted! ID: $eventId');
+                        debugPrint('Check Firestore → events → $eventId');
+                      } catch (e) {
+                        debugPrint('❌ Submission failed: $e');
+                      }
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.payment, color: Colors.yellowAccent),
+                    onPressed: () {
+                      PaymentService.instance.startPayment(
+                        amountPaise: 100,  // ₹1 in paise for minimum test
+                        contactPhone: '9999999999',
+                        onSuccess: (paymentId) {
+                          debugPrint('✅ RAZORPAY SUCCESS: $paymentId');
+                        },
+                        onError: (error) {
+                          debugPrint('❌ RAZORPAY FAILURE: $error');
+                        },
+                      );
+                    },
+                  ),
+                ],
                 const SizedBox(width: 8),
               ],
             ),

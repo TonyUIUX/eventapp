@@ -124,33 +124,10 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
     final config = configAsync.value;
     if (config == null) return;
 
-    if (config.requiresPayment && config.paymentEnabled) {
-      PaymentService.instance.startPayment(
-        amountPaise: config.postingFee,
-        contactPhone: _formData.contactPhone ?? '',
-        onSuccess: (paymentId) => _submitToFirestore(paymentId: paymentId),
-        onError: (error) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Payment Failed: $error', style: const TextStyle(color: Colors.white)), 
-              backgroundColor: AppColors.backgroundCard,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: AppColors.glassBorder)),
-            ),
-          );
-        },
-      );
-    } else {
-      _submitToFirestore();
-    }
-  }
-
-  Future<void> _submitToFirestore({String? paymentId}) async {
     setState(() => _isSubmitting = true);
+    
     try {
-      final config = ref.read(appConfigProvider).value!;
-      
-      // 1. Upload images
+      // 1. Upload images first
       List<String> imageUrls = [];
       for (var i = 0; i < _formData.images.length; i++) {
         final url = await StorageService().uploadEventImage(
@@ -161,40 +138,72 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
         imageUrls.add(url);
       }
 
-      // 2. Submit Event
-      await EventPostService.instance.submitEvent(
-        eventData: {
-          ..._formData.toMap(),
-          'imageUrl': imageUrls.isNotEmpty ? imageUrls.first : '',
-          'imageUrls': imageUrls,
-        },
-        requiresPayment: config.requiresPayment,
-        postingFee: config.postingFee,
-        eventDurationDays: config.eventDurationDays,
-        paymentId: paymentId,
-      );
+      if (config.requiresPayment && config.paymentEnabled) {
+        // 2. Create pending event
+        final eventId = await EventPostService.instance.createPendingEvent(
+          eventData: _formData.toMap(),
+          eventDurationDays: config.eventDurationDays,
+          imageUrls: imageUrls,
+        );
 
-      // Clear draft after successful submission
-      await _formData.clearDraft();
-
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const SuccessScreen()),
-      );
+        // 3. Start Payment
+        PaymentService.instance.startPayment(
+          amountPaise: config.postingFee,
+          contactPhone: _formData.contactPhone ?? '',
+          onSuccess: (paymentId) async {
+            await EventPostService.instance.markPaymentComplete(
+              eventId: eventId,
+              paymentId: paymentId,
+              postingFee: config.postingFee,
+            );
+            await _onSuccess();
+          },
+          onError: (error) async {
+            await EventPostService.instance.markPaymentFailed(eventId);
+            setState(() => _isSubmitting = false);
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Payment Failed: $error', style: const TextStyle(color: Colors.white)), 
+                  backgroundColor: AppColors.backgroundCard,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: AppColors.glassBorder)),
+                ),
+              );
+            }
+          },
+        );
+      } else {
+        // Free submission
+        await EventPostService.instance.submitFreeEvent(
+          eventData: _formData.toMap(),
+          eventDurationDays: config.eventDurationDays,
+          imageUrls: imageUrls,
+        );
+        await _onSuccess();
+      }
     } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Submission failed: $e', style: const TextStyle(color: Colors.white)), 
-          backgroundColor: AppColors.backgroundCard,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: AppColors.glassBorder)),
-        ),
-      );
-    } finally {
-      if (mounted) setState(() => _isSubmitting = false);
+      setState(() => _isSubmitting = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Submission failed: $e', style: const TextStyle(color: Colors.white)), 
+            backgroundColor: AppColors.backgroundCard,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: AppColors.glassBorder)),
+          ),
+        );
+      }
     }
+  }
+
+  Future<void> _onSuccess() async {
+    await _formData.clearDraft();
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const SuccessScreen()),
+    );
   }
 
   Future<bool> _showExitDialog() async {

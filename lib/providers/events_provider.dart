@@ -39,12 +39,16 @@ final filteredEventsProvider =
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
-    // Calculate coming Saturday and Sunday
-    final daysUntilSaturday = (6 - now.weekday) % 7;
-    final saturday = today.add(
-      Duration(days: daysUntilSaturday == 0 ? 0 : daysUntilSaturday),
-    );
-    final sunday = saturday.add(const Duration(days: 1));
+    DateTime saturday;
+    DateTime sunday;
+    if (now.weekday == DateTime.sunday) {
+      saturday = today.subtract(const Duration(days: 1));
+      sunday = today;
+    } else {
+      final daysUntilSaturday = DateTime.saturday - now.weekday;
+      saturday = today.add(Duration(days: daysUntilSaturday));
+      sunday = saturday.add(const Duration(days: 1));
+    }
 
     final filtered = events.where((event) {
       // Client-side guard: skip stale cache entries that slipped through

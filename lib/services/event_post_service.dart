@@ -7,55 +7,119 @@ class EventPostService {
 
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  /// Submit an event to Firestore.
-  ///
-  /// [requiresPayment]   — whether the platform is in paid-posting mode.
-  /// [postingFee]   — fee in paise (from appConfigProvider), only stored
-  ///                       in the payment record when [requiresPayment] is true.
-  /// [eventDurationDays] — how many days until the event auto-expires.
-  /// [paymentId]         — Razorpay payment ID; null for free-period submissions.
-  Future<String> submitEvent({
+  Future<String> createPendingEvent({
     required Map<String, dynamic> eventData,
-    required bool requiresPayment,
     required int eventDurationDays,
-    required int postingFee,
-    String? paymentId,
+    required List<String> imageUrls,
   }) async {
     final user = FirebaseAuth.instance.currentUser;
-
     final now = DateTime.now();
     final expiryDate = now.add(Duration(days: eventDurationDays));
 
     final data = {
       ...eventData,
       'postedBy': user?.uid,
-      'status': 'under_review', // Always goes to review first
-      'paymentStatus': requiresPayment ? 'paid' : 'free_period',
-      'paymentId': paymentId,
+      'status': 'pending_payment',
+      'paymentStatus': 'pending',
+      'imageUrl': imageUrls.isNotEmpty ? imageUrls.first : '',
+      'imageUrls': imageUrls,
       'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
       'expiresAt': Timestamp.fromDate(expiryDate),
-      'isActive': false, // Admin must approve to activate
-      'isFeatured': false, // Admin must promote manually
+      'isActive': false,
+      'isFeatured': false,
       'totalViews': 0,
       'totalShares': 0,
     };
 
     final docRef = await _db.collection('events').add(data);
+    return docRef.id;
+  }
 
-    // Only record a payment entry when money actually changed hands.
-    if (requiresPayment && paymentId != null) {
-      await _db.collection('payments').add({
-        'eventId': docRef.id,
-        'postedBy': user?.uid,
-        'paymentId': paymentId,
-        'amount': postingFee, // stored in paise; UI divides by 100
-        'currency': 'INR',
-        'status': 'success',
-        'createdAt': FieldValue.serverTimestamp(),
+  Future<void> markPaymentComplete({
+    required String eventId,
+    required String paymentId,
+    required int postingFee,
+  }) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final batch = _db.batch();
+    
+    // Update Event
+    final eventRef = _db.collection('events').doc(eventId);
+    batch.update(eventRef, {
+      'status': 'under_review',
+      'paymentStatus': 'paid',
+      'paymentId': paymentId,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+
+    // Create Payment Record
+    final paymentRef = _db.collection('payments').doc();
+    batch.set(paymentRef, {
+      'eventId': eventId,
+      'userId': user.uid,
+      'paymentId': paymentId,
+      'amount': postingFee / 100, // stored in rupees
+      'currency': 'INR',
+      'status': 'captured',
+      'paidAt': FieldValue.serverTimestamp(),
+    });
+
+    // Increment user stats
+    final userRef = _db.collection('users').doc(user.uid);
+    batch.update(userRef, {
+      'totalEventsPosted': FieldValue.increment(1),
+    });
+
+    await batch.commit();
+  }
+
+  Future<void> markPaymentFailed(String eventId) async {
+    await _db.collection('events').doc(eventId).update({
+      'status': 'payment_failed',
+      'paymentStatus': 'failed',
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> submitFreeEvent({
+    required Map<String, dynamic> eventData,
+    required int eventDurationDays,
+    required List<String> imageUrls,
+  }) async {
+    final user = FirebaseAuth.instance.currentUser;
+    final now = DateTime.now();
+    final expiryDate = now.add(Duration(days: eventDurationDays));
+
+    final batch = _db.batch();
+    final eventRef = _db.collection('events').doc();
+
+    final data = {
+      ...eventData,
+      'postedBy': user?.uid,
+      'status': 'under_review',
+      'paymentStatus': 'free_period',
+      'imageUrl': imageUrls.isNotEmpty ? imageUrls.first : '',
+      'imageUrls': imageUrls,
+      'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
+      'expiresAt': Timestamp.fromDate(expiryDate),
+      'isActive': false,
+      'isFeatured': false,
+      'totalViews': 0,
+      'totalShares': 0,
+    };
+    batch.set(eventRef, data);
+
+    if (user != null) {
+      final userRef = _db.collection('users').doc(user.uid);
+      batch.update(userRef, {
+        'totalEventsPosted': FieldValue.increment(1),
       });
     }
 
-    return docRef.id;
+    await batch.commit();
   }
 }
