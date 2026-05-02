@@ -166,14 +166,17 @@ class _CarouselCard extends StatelessWidget {
             fit: StackFit.expand,
             children: [
               // Full background image
-              CachedNetworkImage(
-                imageUrl: event.imageUrl,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => const ColoredBox(
-                  color: AppColors.backgroundCard,
-                ),
-                errorWidget: (context, url, error) => const ColoredBox(
-                  color: AppColors.backgroundSheet,
+              Hero(
+                tag: 'hero_carousel_${event.id}',
+                child: CachedNetworkImage(
+                  imageUrl: event.imageUrl,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => const ColoredBox(
+                    color: AppColors.backgroundCard,
+                  ),
+                  errorWidget: (context, url, error) => const ColoredBox(
+                    color: AppColors.backgroundSheet,
+                  ),
                 ),
               ),
 

@@ -47,6 +47,9 @@ final filteredEventsProvider =
     final sunday = saturday.add(const Duration(days: 1));
 
     final filtered = events.where((event) {
+      // Client-side guard: skip stale cache entries that slipped through
+      if (!event.isActive || event.status != 'active') return false;
+
       final eventDate =
           DateTime(event.date.year, event.date.month, event.date.day);
 
@@ -160,8 +163,11 @@ final relatedEventsProvider = Provider.family<AsyncValue<List<EventModel>>, Stri
   final allEvents = eventsAsync.valueOrNull ?? [];
   
   if (allEvents.isEmpty) return const AsyncValue.loading();
-  
-  final currentEvent = allEvents.firstWhere((e) => e.id == eventId);
+
+  // P0 fix: use firstWhereOrNull to avoid StateError if event was deleted
+  final currentEvent = allEvents.where((e) => e.id == eventId).firstOrNull;
+  if (currentEvent == null) return const AsyncValue.data([]);
+
   final related = allEvents.where((e) => 
     e.category == currentEvent.category && e.id != eventId
   ).toList();

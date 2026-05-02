@@ -149,6 +149,7 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
         MaterialPageRoute(builder: (_) => const SuccessScreen()),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Submission failed: $e', style: const TextStyle(color: Colors.white)), 

@@ -106,6 +106,21 @@ class _TrendingCard extends StatelessWidget {
                       height: 110,
                       width: 160,
                       fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        height: 110,
+                        width: 160,
+                        color: AppColors.backgroundCard,
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        height: 110,
+                        width: 160,
+                        color: AppColors.backgroundSheet,
+                        child: const Icon(
+                          Icons.image_not_supported_outlined,
+                          color: AppColors.textTertiary,
+                          size: 28,
+                        ),
+                      ),
                     ),
                   ),
                 ),
