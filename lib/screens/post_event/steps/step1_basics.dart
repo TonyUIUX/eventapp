@@ -11,7 +11,19 @@ class Step1Basics extends StatelessWidget {
   final PostEventFormData formData;
   final VoidCallback onUpdate;
   
-  const Step1Basics({super.key, required this.formData, required this.onUpdate});
+  final Map<String, String> _categoryEmojis = {
+    'all': '✨',
+    'music': '🎵',
+    'comedy': '😂',
+    'tech': '💻',
+    'fitness': '🏃',
+    'art': '🎨',
+    'workshop': '🛠️',
+    'food': '🍔',
+    'business': '💼',
+  };
+
+  Step1Basics({super.key, required this.formData, required this.onUpdate});
 
   @override
   Widget build(BuildContext context) {
@@ -145,13 +157,9 @@ class Step1Basics extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      Container(
-                        width: 24,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: gradient,
-                        ),
+                      Text(
+                        _categoryEmojis[cat] ?? '✨',
+                        style: const TextStyle(fontSize: 18),
                       ),
                       const SizedBox(width: 8),
                       Expanded(

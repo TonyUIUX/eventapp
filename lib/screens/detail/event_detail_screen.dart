@@ -652,6 +652,20 @@ class _StickyBottomBar extends ConsumerWidget {
               onTap: () {
                 ref.read(savedEventIdsProvider.notifier).toggle(event.id);
                 AnalyticsService.instance.logEventSaved(event.id, saved: !isSaved);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      isSaved ? 'Event removed from saved' : 'Event saved successfully', 
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    backgroundColor: AppColors.backgroundCard,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12), 
+                      side: const BorderSide(color: AppColors.glassBorder),
+                    ),
+                  ),
+                );
               },
               child: isSaved
                   ? Container(

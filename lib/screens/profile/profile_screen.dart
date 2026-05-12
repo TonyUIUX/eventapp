@@ -66,10 +66,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with SingleTicker
                     scrolledUnderElevation: 0,
                     pinned: true,
                     actions: [
-                      TextButton.icon(
-                        onPressed: () => ref.read(authServiceProvider).signOut(),
-                        icon: const Icon(Icons.logout_rounded, color: AppColors.error, size: 18),
-                        label: Text('Sign Out', style: AppTextStyles.label.copyWith(color: AppColors.error)),
+                      IconButton(
+                        onPressed: () => _showSignOutDialog(context, ref),
+                        icon: const Icon(Icons.logout_rounded, color: AppColors.textSecondary),
+                        tooltip: 'Sign Out',
                       ),
                       const SizedBox(width: AppSpacing.sm),
                     ],
@@ -256,6 +256,32 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with SingleTicker
           loading: () => const Center(child: CircularProgressIndicator(color: AppColors.brandCoral)),
           error: (e, _) => Center(child: Text('Error loading profile: $e', style: AppTextStyles.body.copyWith(color: AppColors.error))),
         ),
+      ),
+    );
+  void _showSignOutDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.backgroundSheet,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+          side: const BorderSide(color: AppColors.glassBorder),
+        ),
+        title: Text('Sign Out', style: AppTextStyles.heading2.copyWith(color: Colors.white)),
+        content: Text('Are you sure you want to sign out?', style: AppTextStyles.body.copyWith(color: AppColors.textSecondary)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Cancel', style: AppTextStyles.label.copyWith(color: Colors.white)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              ref.read(authServiceProvider).signOut();
+            },
+            child: Text('Sign Out', style: AppTextStyles.label.copyWith(color: AppColors.error)),
+          ),
+        ],
       ),
     );
   }

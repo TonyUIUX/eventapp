@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:app_links/app_links.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/event_model.dart';
 import '../providers/events_provider.dart';
 import '../screens/detail/event_detail_screen.dart';
 import '../core/constants/app_colors.dart';
@@ -47,7 +48,7 @@ class DeepLinkService {
     _initialized = true;
   }
 
-  void _handleDeepLink(Uri uri) {
+  Future<void> _handleDeepLink(Uri uri) async {
     final ref = _ref;
     final navigatorContext = _navigatorKey?.currentContext;
 
@@ -57,8 +58,8 @@ class DeepLinkService {
 
       // Read current stream value, or wait for the first emit
       final eventsValue = ref.read(eventsProvider);
-      final List events;
-      if (eventsValue is AsyncData) {
+      final List<EventModel> events;
+      if (eventsValue is AsyncData<List<EventModel>>) {
         events = eventsValue.value;
       } else {
         // Not yet loaded — wait for the stream to emit

@@ -11,6 +11,7 @@ import '../../services/event_post_service.dart';
 import '../../services/storage_service.dart';
 import '../../core/auth_gate.dart';
 import '../../core/widgets/gradient_button.dart';
+import '../../main.dart'; // Add this import for MainShell
 import 'success_screen.dart';
 
 import 'steps/step1_basics.dart';
@@ -242,7 +243,11 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
           if (didPop) return;
           final shouldPop = await _showExitDialog();
           if (shouldPop && context.mounted) {
-            Navigator.pop(context);
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            } else {
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const MainShell()));
+            }
           }
         },
         child: Scaffold(
@@ -264,7 +269,11 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
                     onPressed: () async {
                       final shouldPop = await _showExitDialog();
                       if (shouldPop && context.mounted) {
-                        Navigator.pop(context);
+                        if (Navigator.canPop(context)) {
+                          Navigator.pop(context);
+                        } else {
+                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const MainShell()));
+                        }
                       }
                     },
                   ),

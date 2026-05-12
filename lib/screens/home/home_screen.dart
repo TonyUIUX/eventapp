@@ -206,19 +206,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
 
-            // ── Story Ring Avatars ──────────────────────────────────────
-            SliverToBoxAdapter(
-              child: filteredAsync.maybeWhen(
-                data: (events) => _StoryRow(
-                  events: events,
-                  onAddTap: () => Navigator.push(
-                    context,
-                    SlideUpFadeRoute(page: const PostEventScreen()),
-                  ),
-                ),
-                orElse: () => const SizedBox.shrink(),
-              ),
-            ),
 
             // ── Date Filter Toggle ──────────────────────────────────────
             SliverToBoxAdapter(
@@ -256,8 +243,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text('Discover Events', style: AppTextStyles.heading2),
-                    Icon(Icons.tune_rounded,
-                        size: 18, color: AppColors.textSecondary),
                   ],
                 ),
               ),
@@ -303,118 +288,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
-// ── Story Ring Row ────────────────────────────────────────────────────────────
-class _StoryRow extends StatelessWidget {
-  final List events;
-  final VoidCallback onAddTap;
 
-  const _StoryRow({required this.events, required this.onAddTap});
-
-  @override
-  Widget build(BuildContext context) {
-    // Unique posters from loaded events (up to 8)
-    final posters = events
-        .where((e) => e.postedByPhotoUrl != null && e.postedByPhotoUrl!.isNotEmpty)
-        .take(8)
-        .toList();
-
-    return SizedBox(
-      height: 90,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.fromLTRB(
-            AppSpacing.md, AppSpacing.sm, AppSpacing.md, AppSpacing.sm),
-        itemCount: posters.length + 1, // +1 for the add button
-        itemBuilder: (context, index) {
-          if (index == 0) {
-            // First item: "Post Event" add button
-            return _StoryItem(
-              onTap: onAddTap,
-              label: 'Post',
-              child: Container(
-                width: 52,
-                height: 52,
-                decoration: const BoxDecoration(
-                  color: AppColors.backgroundCard,
-                  shape: BoxShape.circle,
-                  border: Border.fromBorderSide(
-                    BorderSide(color: AppColors.glassBorder, width: 1.5),
-                  ),
-                ),
-                child: const Icon(
-                  Icons.add_rounded,
-                  color: AppColors.brandCoral,
-                  size: 26,
-                ),
-              ),
-            );
-          }
-          final event = posters[index - 1];
-          return _StoryItem(
-            onTap: () {},
-            label: event.postedByName?.split(' ').first ?? 'User',
-            child: Container(
-              width: 52,
-              height: 52,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: AppColors.brandGradient,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(2),
-                child: ClipOval(
-                  child: CachedNetworkImage(
-                    imageUrl: event.postedByPhotoUrl!,
-                    fit: BoxFit.cover,
-                    errorWidget: (context, url, error) => const ColoredBox(
-                      color: AppColors.backgroundSheet,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _StoryItem extends StatelessWidget {
-  final Widget child;
-  final String label;
-  final VoidCallback onTap;
-
-  const _StoryItem({
-    required this.child,
-    required this.label,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(right: AppSpacing.sm),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            child,
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: AppTextStyles.caption
-                  .copyWith(color: AppColors.textSecondary),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 // ── Date Filter Bar ───────────────────────────────────────────────────────────
 class _DateFilterBar extends StatelessWidget {

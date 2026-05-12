@@ -76,8 +76,12 @@ class EventModel {
       title: data['title'] ?? '',
       category: data['category'] ?? '',
       description: data['description'] ?? '',
-      date: (data['date'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      endDate: (data['endDate'] as Timestamp?)?.toDate(),
+      date: data['date'] is Timestamp 
+          ? (data['date'] as Timestamp).toDate() 
+          : (data['date'] is String ? DateTime.parse(data['date']) : DateTime.now()),
+      endDate: data['endDate'] is Timestamp 
+          ? (data['endDate'] as Timestamp).toDate() 
+          : (data['endDate'] is String ? DateTime.parse(data['endDate']) : null),
       location: data['location'] ?? '',
       mapLink: data['mapLink'] ?? '',
       imageUrl: data['imageUrl'] ?? '',
@@ -90,8 +94,12 @@ class EventModel {
       website: data['website'] as String?,
       isFeatured: data['isFeatured'] ?? false,
       isActive: data['isActive'] ?? true,
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      expiresAt: (data['expiresAt'] as Timestamp?)?.toDate(),
+      createdAt: data['createdAt'] is Timestamp 
+          ? (data['createdAt'] as Timestamp).toDate() 
+          : (data['createdAt'] is String ? DateTime.parse(data['createdAt']) : DateTime.now()),
+      expiresAt: data['expiresAt'] is Timestamp 
+          ? (data['expiresAt'] as Timestamp).toDate() 
+          : (data['expiresAt'] is String ? DateTime.parse(data['expiresAt']) : null),
       price: data['price'] as String? ?? 'Free',
       ticketLink: data['ticketLink'] as String?,
       registrationLink: data['registrationLink'] as String?,
