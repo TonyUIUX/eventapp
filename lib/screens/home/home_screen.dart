@@ -31,11 +31,11 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  int _selectedDateFilter = 0; // 0=Today, 1=Weekend, 2=This Week
-  String _selectedCategory = 'all';
   bool _promoDismissed = false;
 
+  // Map UI index → provider string value
   static const List<String> _dateFilters = ['Today', 'Weekend', 'This Week'];
+  static const List<String> _dateFilterKeys = ['today', 'weekend', 'week'];
 
   static const List<String> _categories = [
     'all', 'music', 'comedy', 'tech', 'fitness', 'art', 'workshop', 'food', 'business',
@@ -66,7 +66,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       body: RefreshIndicator(
         color: AppColors.brandCoral,
         backgroundColor: AppColors.backgroundCard,
-        onRefresh: () => ref.refresh(eventsProvider.future),
+        onRefresh: () async {
+                  ref.invalidate(eventsProvider);
+                  // Wait briefly for the stream to emit the new data
+                  await Future.delayed(const Duration(milliseconds: 800));
+                },
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(),
           slivers: [
@@ -219,18 +223,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             // ── Date Filter Toggle ──────────────────────────────────────
             SliverToBoxAdapter(
               child: _DateFilterBar(
-                selected: _selectedDateFilter,
+                selected: _dateFilterKeys.indexOf(
+                  ref.watch(selectedDateFilterProvider)),
                 filters: _dateFilters,
-                onSelect: (i) => setState(() => _selectedDateFilter = i),
+                onSelect: (i) {
+                  ref.read(selectedDateFilterProvider.notifier).state =
+                      _dateFilterKeys[i];
+                },
               ),
             ),
 
             // ── Category Chips ──────────────────────────────────────────
             SliverToBoxAdapter(
               child: _CategoryFilterBar(
-                selected: _selectedCategory,
+                selected: ref.watch(selectedCategoryProvider),
                 categories: _categories,
-                onSelect: (cat) => setState(() => _selectedCategory = cat),
+                onSelect: (cat) {
+                  ref.read(selectedCategoryProvider.notifier).state = cat;
+                },
               ),
             ),
 

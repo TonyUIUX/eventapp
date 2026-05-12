@@ -1,5 +1,6 @@
 // seed_firestore.js
 // Run this to auto-upload all 5 sample events to Firestore
+// Events are dated starting from TODAY so they always appear in app
 // Usage:
 //   npm install firebase-admin
 //   node seed_firestore.js
@@ -7,11 +8,6 @@
 const admin = require("firebase-admin");
 const { getFirestore, Timestamp } = require("firebase-admin/firestore");
 
-// -------------------------------------------------------
-// 🔧 CHANGE THIS: path to your service account key JSON
-// Download it from:
-// Firebase Console → Project Settings → Service accounts → Generate new private key
-// -------------------------------------------------------
 const serviceAccount = require("./serviceAccountKey.json");
 
 admin.initializeApp({
@@ -21,27 +17,16 @@ admin.initializeApp({
 const db = getFirestore();
 
 // -------------------------------------------------------
-// Helper: build a Firestore Timestamp from date + time
+// Helper: build a Timestamp N days from now at a given hour
 // -------------------------------------------------------
-function ts(year, month, day, hour = 0, minute = 0) {
-    return Timestamp.fromDate(new Date(year, month - 1, day, hour, minute, 0));
+function daysFromNow(days, hour = 18, minute = 0) {
+    const d = new Date();
+    d.setDate(d.getDate() + days);
+    d.setHours(hour, minute, 0, 0);
+    return Timestamp.fromDate(d);
 }
 
-// -------------------------------------------------------
-// Dynamic Dates: Today, This Saturday, This Sunday
-// -------------------------------------------------------
 const now = new Date();
-const TODAY = { y: now.getFullYear(), m: now.getMonth() + 1, d: now.getDate() };
-
-// Calculate this coming weekend
-const daysToSat = (6 - now.getDay() + 7) % 7;
-const satObj = new Date(now);
-satObj.setDate(now.getDate() + daysToSat);
-const SAT = { y: satObj.getFullYear(), m: satObj.getMonth() + 1, d: satObj.getDate() };
-
-const sunObj = new Date(satObj);
-sunObj.setDate(satObj.getDate() + 1);
-const SUN = { y: sunObj.getFullYear(), m: sunObj.getMonth() + 1, d: sunObj.getDate() };
 
 const events = [
     {
@@ -49,7 +34,7 @@ const events = [
         category: "comedy",
         description:
             "Kochi's biggest open mic night returns! Join us for an evening of stand-up comedy, spoken word, and raw talent from local comedians. Whether you're a first-timer or a seasoned performer, this is your stage. Free entry, first come first served.",
-        date: ts(TODAY.y, TODAY.m, TODAY.d, 19, 0),
+        date: daysFromNow(0, 19, 0), // tonight
         location: "Kashi Art Café, Fort Kochi",
         mapLink: "https://maps.google.com/?q=Kashi+Art+Cafe+Fort+Kochi",
         imageUrl:
@@ -61,14 +46,23 @@ const events = [
         isActive: true,
         status: "active",
         userId: "system_seed",
-        createdAt: ts(TODAY.y, TODAY.m, TODAY.d, 10, 0),
+        postedBy: "system_seed",
+        postedByName: "KochiGo Team",
+        price: "Free",
+        tags: ["free", "popular"],
+        totalViews: 0,
+        totalShares: 0,
+        isVerifiedOrg: true,
+        tier: "standard",
+        paymentStatus: "free_period",
+        createdAt: Timestamp.fromDate(now),
     },
     {
         title: "Flutter & Firebase Workshop",
         category: "tech",
         description:
             "Hands-on workshop for developers who want to build production apps with Flutter and Firebase. We'll cover Firestore integration, authentication patterns, and deployment. Bring your laptop. Limited seats.",
-        date: ts(SAT.y, SAT.m, SAT.d, 10, 0),
+        date: daysFromNow(1, 10, 0), // tomorrow
         location: "Startup Village, Kalamassery",
         mapLink: "https://maps.google.com/?q=Startup+Village+Kalamassery",
         imageUrl:
@@ -80,14 +74,23 @@ const events = [
         isActive: true,
         status: "active",
         userId: "system_seed",
-        createdAt: ts(TODAY.y, TODAY.m, TODAY.d, 11, 0),
+        postedBy: "system_seed",
+        postedByName: "GDG Kochi",
+        price: "Free",
+        tags: ["tech", "workshop"],
+        totalViews: 0,
+        totalShares: 0,
+        isVerifiedOrg: true,
+        tier: "standard",
+        paymentStatus: "free_period",
+        createdAt: Timestamp.fromDate(now),
     },
     {
         title: "Yoga at the Beach",
         category: "fitness",
         description:
             "Start your Saturday right with a sunrise yoga session at Cherai Beach. Suitable for all levels — beginners welcome. Bring your own mat. Session runs for 1 hour followed by fresh coconut water. Pure Kerala vibes.",
-        date: ts(SAT.y, SAT.m, SAT.d, 6, 30),
+        date: daysFromNow(2, 6, 30), // 2 days from now
         location: "Cherai Beach, North Paravur",
         mapLink: "https://maps.google.com/?q=Cherai+Beach+Kerala",
         imageUrl:
@@ -99,14 +102,23 @@ const events = [
         isActive: true,
         status: "active",
         userId: "system_seed",
-        createdAt: ts(TODAY.y, TODAY.m, TODAY.d, 12, 0),
+        postedBy: "system_seed",
+        postedByName: "Kerala Wellness Co.",
+        price: "Free",
+        tags: ["fitness", "outdoor"],
+        totalViews: 0,
+        totalShares: 0,
+        isVerifiedOrg: false,
+        tier: "standard",
+        paymentStatus: "free_period",
+        createdAt: Timestamp.fromDate(now),
     },
     {
         title: "Indie Music Night: Local Bands",
         category: "music",
         description:
             "Four of Kochi's best indie bands perform live in an intimate venue setting. Featuring experimental rock, folk fusion, and jazz. Doors open at 6 PM. Tickets at the door. Food and drinks available.",
-        date: ts(SUN.y, SUN.m, SUN.d, 18, 0),
+        date: daysFromNow(3, 18, 0), // 3 days from now
         location: "The Barge, Marine Drive",
         mapLink: "https://maps.google.com/?q=The+Barge+Marine+Drive+Kochi",
         imageUrl:
@@ -118,14 +130,23 @@ const events = [
         isActive: true,
         status: "active",
         userId: "system_seed",
-        createdAt: ts(TODAY.y, TODAY.m, TODAY.d, 13, 0),
+        postedBy: "system_seed",
+        postedByName: "Kochi Live Music",
+        price: "₹200",
+        tags: ["music", "popular", "limited"],
+        totalViews: 0,
+        totalShares: 0,
+        isVerifiedOrg: true,
+        tier: "standard",
+        paymentStatus: "free_period",
+        createdAt: Timestamp.fromDate(now),
     },
     {
         title: "Mural Art Walk — Fort Kochi",
         category: "art",
         description:
             "Join our guided walk through Fort Kochi's iconic street murals. A local artist will explain the stories behind the works and the Kochi-Muziris Biennale legacy. 2 hours. Meeting point at David Hall.",
-        date: ts(SAT.y, SAT.m, SAT.d, 9, 0),
+        date: daysFromNow(4, 9, 0), // 4 days from now
         location: "David Hall, Fort Kochi",
         mapLink: "https://maps.google.com/?q=David+Hall+Fort+Kochi",
         imageUrl:
@@ -137,24 +158,47 @@ const events = [
         isActive: true,
         status: "active",
         userId: "system_seed",
-        createdAt: ts(TODAY.y, TODAY.m, TODAY.d, 14, 0),
+        postedBy: "system_seed",
+        postedByName: "Kochi Arts Foundation",
+        price: "Free",
+        tags: ["art", "outdoor", "family"],
+        totalViews: 0,
+        totalShares: 0,
+        isVerifiedOrg: false,
+        tier: "standard",
+        paymentStatus: "free_period",
+        createdAt: Timestamp.fromDate(now),
     },
 ];
 
 // -------------------------------------------------------
-// Upload all events
+// Upload all events — delete existing system_seed events first
 // -------------------------------------------------------
 async function seed() {
     console.log("🌱 Seeding Firestore with sample events...\n");
     const collection = db.collection("events");
 
+    // Remove old seed data to avoid duplicates
+    console.log("🧹 Cleaning up old seeded events...");
+    const existing = await collection
+        .where("userId", "==", "system_seed")
+        .get();
+    const deletePromises = existing.docs.map((doc) => doc.ref.delete());
+    await Promise.all(deletePromises);
+    console.log(`   Deleted ${existing.docs.length} old events.\n`);
+
     for (const event of events) {
         const ref = await collection.add(event);
-        console.log(`✅ Added: "${event.title}" → ID: ${ref.id}`);
+        const eventDate = event.date.toDate();
+        console.log(
+            `✅ Added: "${event.title}" → ID: ${ref.id} | Date: ${eventDate.toLocaleDateString("en-IN")}`
+        );
     }
 
     console.log("\n🎉 Done! All 5 events uploaded to Firestore.");
-    console.log("Open your app and set date filter to Today or This Weekend.\n");
+    console.log(
+        "Events span today → next 4 days. Open app with 'This Week' filter.\n"
+    );
     process.exit(0);
 }
 

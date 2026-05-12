@@ -9,7 +9,7 @@ class FirestoreService {
   
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  // Optimized stream — equality-only filters require NO composite index
+  // Real-time stream — equality-only filters require NO composite index
   Stream<List<EventModel>> getEventsStream() {
     return _db
         .collection(FirestoreCollections.events)
@@ -19,29 +19,54 @@ class FirestoreService {
         .snapshots()
         .map((snapshot) {
           final events = snapshot.docs
-              .map((doc) => EventModel.fromFirestore(doc))
+              .map((doc) {
+                try { return EventModel.fromFirestore(doc); }
+                catch (_) { return null; }
+              })
+              .whereType<EventModel>()
               .toList();
-          // Sort ascending by date client-side (avoids composite index)
           events.sort((a, b) => a.date.compareTo(b.date));
           return events;
         });
   }
 
-  // One-time fetch for initialization/refresh — no composite index needed
+  // One-time fetch — server first, falls back to cache automatically
   Future<List<EventModel>> getEvents() async {
-    final query = await _db
-        .collection(FirestoreCollections.events)
-        .where('isActive', isEqualTo: true)
-        .where('status', isEqualTo: 'active')
-        .limit(50)
-        .get();
-    
-    final events = query.docs
-        .map((doc) => EventModel.fromFirestore(doc))
-        .toList();
-    // Sort ascending by date client-side
-    events.sort((a, b) => a.date.compareTo(b.date));
-    return events;
+    try {
+      final query = await _db
+          .collection(FirestoreCollections.events)
+          .where('isActive', isEqualTo: true)
+          .where('status', isEqualTo: 'active')
+          .limit(50)
+          .get(const GetOptions(source: Source.serverAndCache));
+      
+      final events = query.docs
+          .map((doc) {
+            try { return EventModel.fromFirestore(doc); }
+            catch (_) { return null; }
+          })
+          .whereType<EventModel>()
+          .toList();
+      events.sort((a, b) => a.date.compareTo(b.date));
+      return events;
+    } catch (e) {
+      // Fallback to local cache on network error
+      final query = await _db
+          .collection(FirestoreCollections.events)
+          .where('isActive', isEqualTo: true)
+          .where('status', isEqualTo: 'active')
+          .limit(50)
+          .get(const GetOptions(source: Source.cache));
+      final events = query.docs
+          .map((doc) {
+            try { return EventModel.fromFirestore(doc); }
+            catch (_) { return null; }
+          })
+          .whereType<EventModel>()
+          .toList();
+      events.sort((a, b) => a.date.compareTo(b.date));
+      return events;
+    }
   }
 
   Future<EventModel?> getEventById(String eventId) async {

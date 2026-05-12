@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -15,27 +16,45 @@ class AuthService {
   String? get uid => currentUser?.uid;
   bool get isLoggedIn => currentUser != null;
 
-  // Google Sign In
+  // Google Sign In — handles both web (popup) and mobile (intent)
   Future<UserCredential?> signInWithGoogle() async {
     try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return null;
+      if (kIsWeb) {
+        // Web: use signInWithPopup
+        final GoogleAuthProvider googleProvider = GoogleAuthProvider();
+        googleProvider.addScope('email');
+        googleProvider.addScope('profile');
+        final userCredential = await _auth.signInWithPopup(googleProvider);
+        if (userCredential.additionalUserInfo?.isNewUser ?? false) {
+          await _createUserProfile(userCredential.user!);
+        }
+        return userCredential;
+      } else {
+        // Mobile: use google_sign_in package
+        final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+        if (googleUser == null) return null; // User cancelled
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      final OAuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
+        final GoogleSignInAuthentication googleAuth =
+            await googleUser.authentication;
+        final OAuthCredential credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
 
-      final UserCredential userCredential = await _auth.signInWithCredential(credential);
+        final UserCredential userCredential =
+            await _auth.signInWithCredential(credential);
 
-      // Create profile for new users
-      if (userCredential.additionalUserInfo?.isNewUser ?? false) {
-        await _createUserProfile(userCredential.user!);
+        if (userCredential.additionalUserInfo?.isNewUser ?? false) {
+          await _createUserProfile(userCredential.user!);
+        }
+
+        return userCredential;
       }
-
-      return userCredential;
+    } on FirebaseAuthException catch (e) {
+      debugPrint('[AuthService] Google sign-in error: ${e.code} — ${e.message}');
+      rethrow;
     } catch (e) {
+      debugPrint('[AuthService] Google sign-in unknown error: $e');
       rethrow;
     }
   }
@@ -47,7 +66,8 @@ class AuthService {
     required String displayName,
   }) async {
     try {
-      final UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+      final UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -56,7 +76,8 @@ class AuthService {
       await _createUserProfile(userCredential.user!, nameOverride: displayName);
 
       return userCredential;
-    } catch (e) {
+    } on FirebaseAuthException catch (e) {
+      debugPrint('[AuthService] SignUp error: ${e.code} — ${e.message}');
       rethrow;
     }
   }
@@ -67,8 +88,10 @@ class AuthService {
     required String password,
   }) async {
     try {
-      return await _auth.signInWithEmailAndPassword(email: email, password: password);
-    } catch (e) {
+      return await _auth.signInWithEmailAndPassword(
+          email: email, password: password);
+    } on FirebaseAuthException catch (e) {
+      debugPrint('[AuthService] SignIn error: ${e.code} — ${e.message}');
       rethrow;
     }
   }
@@ -116,7 +139,7 @@ class AuthService {
   // Sign Out
   Future<void> signOut() async {
     await Future.wait([
-      _googleSignIn.signOut(),
+      if (!kIsWeb) _googleSignIn.signOut(),
       _auth.signOut(),
     ]);
   }
@@ -138,7 +161,9 @@ class AuthService {
       'isVerifiedOrg': false,
       'totalEventsPosted': 0,
       'totalViews': 0,
+      'role': 'user',
       'createdAt': FieldValue.serverTimestamp(),
+      'lastActiveAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
   }
 }

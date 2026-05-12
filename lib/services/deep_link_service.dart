@@ -55,41 +55,49 @@ class DeepLinkService {
     if (uri.pathSegments.length == 2 && uri.pathSegments[0] == 'event') {
       final eventId = uri.pathSegments[1];
 
-      ref.read(eventsProvider.future).then((events) {
-        final ctx = _navigatorKey?.currentContext ?? navigatorContext;
-        if (ctx == null || !ctx.mounted) return;
-        try {
-          final event = events.firstWhere((e) => e.id == eventId);
-          Navigator.push(
-            ctx,
-            MaterialPageRoute(
-              builder: (_) => EventDetailScreen(event: event),
+      // Read current stream value, or wait for the first emit
+      final eventsValue = ref.read(eventsProvider);
+      final List events;
+      if (eventsValue is AsyncData) {
+        events = eventsValue.value;
+      } else {
+        // Not yet loaded — wait for the stream to emit
+        events = await ref.read(eventsProvider.future);
+      }
+
+      final ctx = _navigatorKey?.currentContext ?? navigatorContext;
+      if (ctx == null || !ctx.mounted) return;
+      try {
+        final event = events.firstWhere((e) => e.id == eventId);
+        Navigator.push(
+          ctx,
+          MaterialPageRoute(
+            builder: (_) => EventDetailScreen(event: event),
+          ),
+        );
+      } catch (e) {
+        debugPrint('Event not found for deep link: $eventId');
+        final dialogCtx = _navigatorKey?.currentContext;
+        if (dialogCtx == null || !dialogCtx.mounted) return;
+        showDialog(
+          context: dialogCtx,
+          builder: (ctx) => AlertDialog(
+            backgroundColor: AppColors.backgroundSheet,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadius.xl),
+              side: const BorderSide(color: AppColors.glassBorder),
             ),
-          );
-        } catch (e) {
-          debugPrint('Event not found for deep link: $eventId');
-          final dialogCtx = _navigatorKey?.currentContext;
-          if (dialogCtx == null || !dialogCtx.mounted) return;
-          showDialog(
-            context: dialogCtx,
-            builder: (ctx) => AlertDialog(
-              backgroundColor: AppColors.backgroundSheet,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppRadius.xl),
-                side: const BorderSide(color: AppColors.glassBorder),
+            title: Text('Event Unavailable', style: AppTextStyles.heading2.copyWith(color: Colors.white)),
+            content: Text('This event has ended or was removed by the organizer.', style: AppTextStyles.body.copyWith(color: AppColors.textSecondary)),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text('OK', style: AppTextStyles.label.copyWith(color: AppColors.brandCoral)),
               ),
-              title: Text('Event Unavailable', style: AppTextStyles.heading2.copyWith(color: Colors.white)),
-              content: Text('This event has ended or was removed by the organizer.', style: AppTextStyles.body.copyWith(color: AppColors.textSecondary)),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: Text('OK', style: AppTextStyles.label.copyWith(color: AppColors.brandCoral)),
-                ),
-              ],
-            ),
-          );
-        }
-      });
+            ],
+          ),
+        );
+      }
     }
   }
 

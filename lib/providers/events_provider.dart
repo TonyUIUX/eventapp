@@ -8,20 +8,18 @@ final firestoreServiceProvider = Provider<FirestoreService>(
   (ref) => FirestoreService.instance,
 );
 
-// Fetches all active events from Firebase (server already filters past events)
-// Uses keepAlive to cache the list across tab switches (Phase 4 Perf)
-final eventsProvider = FutureProvider<List<EventModel>>((ref) async {
-  ref.keepAlive();
+// Real-time stream from Firestore — auto-updates when admin changes events
+final eventsProvider = StreamProvider<List<EventModel>>((ref) {
   final service = ref.read(firestoreServiceProvider);
-  return service.getEvents();
+  return service.getEventsStream();
 });
 
 // ─── Filter state ─────────────────────────────────────────────────────────
 // Currently selected category chip — default 'all'
 final selectedCategoryProvider = StateProvider<String>((ref) => 'all');
 
-// Currently selected date filter — 'today' or 'weekend'
-final selectedDateFilterProvider = StateProvider<String>((ref) => 'today');
+// Currently selected date filter — 'today', 'weekend', or 'week'
+final selectedDateFilterProvider = StateProvider<String>((ref) => 'week');
 
 // ─── AI Personalization ───────────────────────────────────────────────────
 final categoryAffinitiesProvider = FutureProvider<Map<String, int>>((ref) async {
@@ -36,12 +34,16 @@ final filteredEventsProvider =
   final dateFilter = ref.watch(selectedDateFilterProvider);
 
   return eventsAsync.whenData((events) {
-    final now = DateTime.now();
+    // Use local time to avoid IST/UTC mismatch
+    final now = DateTime.now().toLocal();
     final today = DateTime(now.year, now.month, now.day);
 
     DateTime saturday;
     DateTime sunday;
-    if (now.weekday == DateTime.sunday) {
+    if (now.weekday == DateTime.saturday) {
+      saturday = today;
+      sunday = today.add(const Duration(days: 1));
+    } else if (now.weekday == DateTime.sunday) {
       saturday = today.subtract(const Duration(days: 1));
       sunday = today;
     } else {
@@ -51,11 +53,13 @@ final filteredEventsProvider =
     }
 
     final filtered = events.where((event) {
-      // Client-side guard: skip stale cache entries that slipped through
+      // Client-side guard: skip if not active/published
       if (!event.isActive || event.status != 'active') return false;
 
-      final eventDate =
-          DateTime(event.date.year, event.date.month, event.date.day);
+      // Convert event date to local and strip time component
+      final localEventDate = event.date.toLocal();
+      final eventDate = DateTime(
+          localEventDate.year, localEventDate.month, localEventDate.day);
 
       final bool dateMatch;
       if (dateFilter == 'today') {
@@ -63,7 +67,7 @@ final filteredEventsProvider =
       } else if (dateFilter == 'weekend') {
         dateMatch = eventDate == saturday || eventDate == sunday;
       } else {
-        // week
+        // 'week' — show next 7 days including today
         final weekEnd = today.add(const Duration(days: 7));
         dateMatch = !eventDate.isBefore(today) && !eventDate.isAfter(weekEnd);
       }
@@ -99,27 +103,25 @@ final filteredEventsProvider =
   });
 });
 
-// ─── NEW v1.1: Featured carousel events ──────────────────────────────────
-// Featured events that are today or in the future (no stale carousels)
+// ─── Featured carousel events ──────────────────────────────────────────────
 final featuredEventsProvider =
     Provider<AsyncValue<List<EventModel>>>((ref) {
   return ref.watch(eventsProvider).whenData((events) {
-    final today = DateTime.now();
+    final today = DateTime.now().toLocal();
     final todayDate = DateTime(today.year, today.month, today.day);
     return events
-        .where((e) =>
-            e.isFeatured &&
-            !DateTime(e.date.year, e.date.month, e.date.day)
-                .isBefore(todayDate))
+        .where((e) {
+          final local = e.date.toLocal();
+          final eDate = DateTime(local.year, local.month, local.day);
+          return e.isFeatured && !eDate.isBefore(todayDate);
+        })
         .toList();
   });
 });
 
-// ─── NEW v1.1: Search ─────────────────────────────────────────────────────
-// Current search query — updated on every keystroke
+// ─── Search ───────────────────────────────────────────────────────────────
 final searchQueryProvider = StateProvider<String>((ref) => '');
 
-// Client-side search across title, description, location, category, tags
 final searchResultsProvider =
     Provider<AsyncValue<List<EventModel>>>((ref) {
   final eventsAsync = ref.watch(eventsProvider);
@@ -138,41 +140,40 @@ final searchResultsProvider =
   });
 });
 
-// ─── NEW v2.0: Trending events ───────────────────────────────────────────
-// Sorts all upcoming events by simulated popularity (FOMO watching count)
+// ─── Trending events ──────────────────────────────────────────────────────
 final trendingEventsProvider = Provider<AsyncValue<List<EventModel>>>((ref) {
   return ref.watch(eventsProvider).whenData((events) {
-    final today = DateTime.now();
+    final today = DateTime.now().toLocal();
     final todayDate = DateTime(today.year, today.month, today.day);
     
-    final upcoming = events.where((e) => 
-      !DateTime(e.date.year, e.date.month, e.date.day).isBefore(todayDate)
-    ).toList();
+    final upcoming = events.where((e) {
+      final local = e.date.toLocal();
+      final eDate = DateTime(local.year, local.month, local.day);
+      return !eDate.isBefore(todayDate);
+    }).toList();
 
-    // Sort by simulated trending count (eventId hashcode % 40 + 12)
     upcoming.sort((a, b) {
       final countA = (a.id.hashCode.abs() % 40) + 12;
       final countB = (b.id.hashCode.abs() % 40) + 12;
-      return countB.compareTo(countA); // Highest first
+      return countB.compareTo(countA);
     });
 
     return upcoming.take(10).toList();
   });
 });
 
-// ─── NEW v2.0: Related events ───────────────────────────────────────────
-// Provides 3 events from the same category, excluding the current one
-final relatedEventsProvider = Provider.family<AsyncValue<List<EventModel>>, String>((ref, eventId) {
+// ─── Related events ──────────────────────────────────────────────────────
+final relatedEventsProvider =
+    Provider.family<AsyncValue<List<EventModel>>, String>((ref, eventId) {
   final eventsAsync = ref.watch(eventsProvider);
   final allEvents = eventsAsync.valueOrNull ?? [];
   
   if (allEvents.isEmpty) return const AsyncValue.loading();
 
-  // P0 fix: use firstWhereOrNull to avoid StateError if event was deleted
   final currentEvent = allEvents.where((e) => e.id == eventId).firstOrNull;
   if (currentEvent == null) return const AsyncValue.data([]);
 
-  final related = allEvents.where((e) => 
+  final related = allEvents.where((e) =>
     e.category == currentEvent.category && e.id != eventId
   ).toList();
   

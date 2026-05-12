@@ -109,7 +109,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
         'invalid-credential'      => 'Email or password is incorrect.',
         'too-many-requests'       => 'Too many attempts. Please wait and try again.',
         'network-request-failed'  => 'Network error. Check your internet connection.',
-        _                         => 'Sign-in failed: ${e.message ?? e.code}',
+        'operation-not-allowed'   => 'Email/Password sign-in is not enabled. Contact support.',
+        'user-disabled'           => 'This account has been disabled.',
+        _                         => 'Sign-in failed (${e.code}). Please try again.',
       };
       _showError(msg);
     } catch (e) {
