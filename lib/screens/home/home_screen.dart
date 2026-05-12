@@ -17,7 +17,6 @@ import '../search/search_screen.dart';
 import '../post_event/post_event_screen.dart';
 import '../../services/event_post_service.dart';
 import '../../models/post_event_form_data.dart';
-import '../../providers/auth_provider.dart';
 import '../../services/payment_service.dart';
 import 'package:flutter/foundation.dart';
 
@@ -127,11 +126,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           eventData: (PostEventFormData()
                             ..title = 'DEBUG TEST EVENT ${DateTime.now().millisecondsSinceEpoch}'
                             ..category = 'tech'
-                            ..eventDate = DateTime.now().add(const Duration(days: 1))
-                            ..startTime = const TimeOfDay(hour: 18, minute: 0)
+                            ..date = DateTime.now().add(const Duration(days: 1))
                             ..description = 'This is a debug test event with sufficient description length for validation testing purposes.'
                             ..location = 'Test Location, Kochi'
-                            ..organizerName = 'Debug Tester'
+                            ..organizer = 'Debug Tester'
                             ..entryType = 'free'
                             ..price = 'Free')
                             .toMap(),
@@ -259,7 +257,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             filteredAsync.when(
               data: (events) {
                 if (events.isEmpty) {
-                  return const SliverFillRemaining(child: _EmptyState());
+                  return const SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: _EmptyState(),
+                  );
                 }
                 return SliverList(
                   delegate: SliverChildBuilderDelegate(
@@ -622,6 +623,7 @@ class _EmptyState extends StatelessWidget {
         padding: const EdgeInsets.all(AppSpacing.xxl),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             const Text('🎭', style: TextStyle(fontSize: 64)),
             const SizedBox(height: AppSpacing.lg),
@@ -631,10 +633,12 @@ class _EmptyState extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.sm),
-            Text(
-              'Try adjusting your category or date filter.',
-              style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
-              textAlign: TextAlign.center,
+            Flexible(
+              child: Text(
+                'Try adjusting your category or date filter.',
+                style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+                textAlign: TextAlign.center,
+              ),
             ),
           ],
         ),

@@ -28,11 +28,20 @@ function ts(year, month, day, hour = 0, minute = 0) {
 }
 
 // -------------------------------------------------------
-// Today = April 12 2026, Weekend = April 18-19 2026
+// Dynamic Dates: Today, This Saturday, This Sunday
 // -------------------------------------------------------
-const TODAY = { y: 2026, m: 4, d: 12 };
-const SAT = { y: 2026, m: 4, d: 18 };
-const SUN = { y: 2026, m: 4, d: 19 };
+const now = new Date();
+const TODAY = { y: now.getFullYear(), m: now.getMonth() + 1, d: now.getDate() };
+
+// Calculate this coming weekend
+const daysToSat = (6 - now.getDay() + 7) % 7;
+const satObj = new Date(now);
+satObj.setDate(now.getDate() + daysToSat);
+const SAT = { y: satObj.getFullYear(), m: satObj.getMonth() + 1, d: satObj.getDate() };
+
+const sunObj = new Date(satObj);
+sunObj.setDate(satObj.getDate() + 1);
+const SUN = { y: sunObj.getFullYear(), m: sunObj.getMonth() + 1, d: sunObj.getDate() };
 
 const events = [
     {

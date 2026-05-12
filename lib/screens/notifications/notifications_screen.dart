@@ -10,6 +10,8 @@ import '../../providers/notification_provider.dart';
 import '../../models/notification_model.dart';
 import '../../services/notification_service.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/events_provider.dart';
+import '../../models/event_model.dart';
 import '../detail/event_detail_screen.dart';
 import '../../services/firestore_service.dart';
 

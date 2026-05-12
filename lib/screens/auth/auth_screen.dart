@@ -7,6 +7,7 @@ import '../../core/constants/app_spacing.dart';
 import '../../core/widgets/gradient_button.dart';
 import '../../core/widgets/tap_scale.dart';
 import '../../providers/auth_provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 // lib/screens/auth/auth_screen.dart
 // Dark glassmorphism Auth Screen — KochiGo v3.1
@@ -97,11 +98,22 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
         );
       }
 
-      if (mounted) {
-        Navigator.pop(context);
-      }
+      if (mounted) Navigator.pop(context);
+    } on FirebaseAuthException catch (e) {
+      final msg = switch (e.code) {
+        'email-already-in-use'    => 'An account with this email already exists.',
+        'invalid-email'           => 'Please enter a valid email address.',
+        'weak-password'           => 'Password must be at least 6 characters.',
+        'user-not-found'          => 'No account found with this email.',
+        'wrong-password'          => 'Incorrect password. Please try again.',
+        'invalid-credential'      => 'Email or password is incorrect.',
+        'too-many-requests'       => 'Too many attempts. Please wait and try again.',
+        'network-request-failed'  => 'Network error. Check your internet connection.',
+        _                         => 'Sign-in failed: ${e.message ?? e.code}',
+      };
+      _showError(msg);
     } catch (e) {
-      _showError('Authentication failed. Check your credentials.');
+      _showError('An unexpected error occurred. Please try again.');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -196,7 +208,26 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Image.network('https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg', height: 20),
+                          // Inline Google 'G' — no network call, no SVG issue
+                          Container(
+                            width: 22,
+                            height: 22,
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Center(
+                              child: Text(
+                                'G',
+                                style: TextStyle(
+                                  color: Colors.blueAccent.shade700,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 14,
+                                  height: 1,
+                                ),
+                              ),
+                            ),
+                          ),
                           const SizedBox(width: 12),
                           Text(
                             'Continue with Google',

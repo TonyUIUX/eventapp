@@ -9,31 +9,39 @@ class FirestoreService {
   
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  // Optimized stream with server-side filter for active & upcoming events
+  // Optimized stream — equality-only filters require NO composite index
   Stream<List<EventModel>> getEventsStream() {
     return _db
         .collection(FirestoreCollections.events)
         .where('isActive', isEqualTo: true)
         .where('status', isEqualTo: 'active')
-        .orderBy('date', descending: false)
         .limit(50)
         .snapshots()
         .map((snapshot) {
-          return snapshot.docs.map((doc) => EventModel.fromFirestore(doc)).toList();
+          final events = snapshot.docs
+              .map((doc) => EventModel.fromFirestore(doc))
+              .toList();
+          // Sort ascending by date client-side (avoids composite index)
+          events.sort((a, b) => a.date.compareTo(b.date));
+          return events;
         });
   }
 
-  // One-time fetch for initialization/refresh
+  // One-time fetch for initialization/refresh — no composite index needed
   Future<List<EventModel>> getEvents() async {
     final query = await _db
         .collection(FirestoreCollections.events)
         .where('isActive', isEqualTo: true)
         .where('status', isEqualTo: 'active')
-        .orderBy('date', descending: false)
         .limit(50)
         .get();
     
-    return query.docs.map((doc) => EventModel.fromFirestore(doc)).toList();
+    final events = query.docs
+        .map((doc) => EventModel.fromFirestore(doc))
+        .toList();
+    // Sort ascending by date client-side
+    events.sort((a, b) => a.date.compareTo(b.date));
+    return events;
   }
 
   Future<EventModel?> getEventById(String eventId) async {

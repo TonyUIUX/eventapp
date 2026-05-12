@@ -35,31 +35,32 @@ Future<void> main() async {
 
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
-    statusBarIconBrightness: Brightness.light,  // white icons for dark bg
+    statusBarIconBrightness: Brightness.light,
     systemNavigationBarColor: AppColors.backgroundBase,
     systemNavigationBarIconBrightness: Brightness.light,
   ));
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
-  // Enable Firestore offline persistence (Settings API — works on web + mobile).
+  // Enable Firestore offline persistence
   FirebaseFirestore.instance.settings = const Settings(
     persistenceEnabled: true,
   );
 
+  // Fire debug checks in background — does NOT block runApp
   if (kDebugMode) {
-    await _verifyFirestoreRead();
-    await _verifyConfigRead();
-    await _verifyAuthFlow();
+    Future.wait([
+      _verifyFirestoreRead(),
+      _verifyConfigRead(),
+      _verifyAuthFlow(),
+    ]);
   }
 
   final prefs = await SharedPreferences.getInstance();
   final hasSeenOnboarding = prefs.getBool('has_seen_onboarding') ?? false;
 
-  await RatingService.trackLaunch();
-  await PushNotificationService.instance.init();
-
-  // Prime the local event cache in the background
-  // so the app is ready even when offline
+  // Non-blocking background tasks
+  RatingService.trackLaunch();
+  PushNotificationService.instance.init();
   SmartCacheService.instance.warmUpCache();
 
   runApp(
@@ -76,6 +77,11 @@ class KochiGoApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isMaintenance = ref.watch(maintenanceModeProvider);
+
+    // Remove the native splash on the very first frame the UI is ready.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FlutterNativeSplash.remove();
+    });
 
     return MaterialApp(
       title: 'Vivra',
