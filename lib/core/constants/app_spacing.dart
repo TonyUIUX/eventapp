@@ -1,5 +1,5 @@
 // lib/core/constants/app_spacing.dart
-// Spacing & Radius tokens — KochiGo v3.1
+// Spacing & Radius tokens — Evorra v3.1
 
 class AppSpacing {
   static const double xs  = 4.0;

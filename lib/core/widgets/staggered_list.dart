@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 // lib/core/widgets/staggered_list.dart
-// Staggered entrance animation for list items — KochiGo v3.1
+// Staggered entrance animation for list items — Evorra v3.1
 // Use this for ALL lists (events, notifications, search results).
 
 class StaggeredListItem extends StatefulWidget {

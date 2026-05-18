@@ -55,7 +55,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const Icon(Icons.rocket_launch_rounded, size: 48, color: Color(0xFF6366F1)),
               const SizedBox(height: 16),
               const Text(
-                'KochiGo Control',
+                'Evorra Control',
                 style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: Color(0xFF111827), letterSpacing: -1),
               ),
               const Text('Enter credentials to manage the ecosystem', style: TextStyle(color: Color(0xFF6B7280))),
@@ -79,7 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     TextField(
                       controller: _emailController,
                       decoration: InputDecoration(
-                        hintText: 'admin@kochigo.com',
+                        hintText: 'admin@Evorra.com',
                         prefixIcon: const Icon(Icons.email_outlined, size: 20),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                         enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFFE5E7EB))),
@@ -120,7 +120,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              const Text('© 2026 KochiGo Production Ecosystem', style: TextStyle(color: Color(0xFF9CA3AF), fontSize: 12)),
+              const Text('© 2026 Evorra Production Ecosystem', style: TextStyle(color: Color(0xFF9CA3AF), fontSize: 12)),
             ],
           ),
         ),

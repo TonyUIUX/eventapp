@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 // lib/core/utils/app_router.dart
-// Custom page transitions — KochiGo v3.1 animation spec
+// Custom page transitions — Evorra v3.1 animation spec
 
 /// Slide up + fade route transition.
 /// Use for: PostEventScreen, EventDetailScreen, AuthScreen

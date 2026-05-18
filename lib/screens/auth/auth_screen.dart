@@ -10,7 +10,7 @@ import '../../providers/auth_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 // lib/screens/auth/auth_screen.dart
-// Dark glassmorphism Auth Screen — KochiGo v3.1
+// Dark glassmorphism Auth Screen — Evorra v3.1
 
 class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
@@ -178,7 +178,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
                       shaderCallback: (bounds) => AppColors.brandGradient.createShader(bounds),
                       blendMode: BlendMode.srcIn,
                       child: Text(
-                        'Vivra',
+                        'Evorra',
                         style: AppTextStyles.display.copyWith(
                           fontFamily: 'Poppins',
                           fontSize: 48,

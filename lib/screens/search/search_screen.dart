@@ -12,7 +12,7 @@ import '../../core/widgets/gradient_button.dart';
 import '../home/widgets/event_card.dart';
 
 // lib/screens/search/search_screen.dart
-// Dark glassmorphism search screen — KochiGo v3.1
+// Dark glassmorphism search screen — Evorra v3.1
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});

@@ -15,7 +15,7 @@ import '../detail/event_detail_screen.dart';
 import 'edit_profile_screen.dart';
 
 // lib/screens/profile/profile_screen.dart
-// Dark glassmorphism Profile Screen — KochiGo v3.1
+// Dark glassmorphism Profile Screen — Evorra v3.1
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -141,7 +141,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with SingleTicker
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                user.displayName.isEmpty ? 'KochiGo User' : user.displayName,
+                                user.displayName.isEmpty ? 'Evorra User' : user.displayName,
                                 style: AppTextStyles.heading1.copyWith(color: Colors.white),
                               ),
                               if (user.isVerifiedOrg) ...[
@@ -258,6 +258,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with SingleTicker
         ),
       ),
     );
+  }
+
   void _showSignOutDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
@@ -286,6 +288,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with SingleTicker
     );
   }
 }
+
 
 // ── Stat Pill ─────────────────────────────────────────────────────────────────
 

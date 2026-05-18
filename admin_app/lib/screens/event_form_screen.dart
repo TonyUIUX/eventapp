@@ -65,13 +65,17 @@ class _EventFormScreenState extends State<EventFormScreen> {
     _websiteController = TextEditingController(text: e?.website ?? '');
 
     if (e != null) {
-      _selectedCategory = _categories.contains(e.category) ? e.category : 'comedy';
-      _selectedPrice = e.price;
+      _selectedCategory = _categories.contains(e.category) ? e.category : _categories.first;
+      // Sanitize price: if stored value doesn't match any option, fall back to 'Custom'
+      _selectedPrice = _priceOptions.contains(e.price) ? e.price : 'Custom';
       _selectedDate = e.date;
       _selectedTime = TimeOfDay.fromDateTime(e.date);
       _selectedTags = List.from(e.tags);
       _isFeatured = e.isFeatured;
-      _status = e.status;
+      // Sanitize status: map 'under_review' → 'pending' for the dropdown
+      const validStatuses = ['active', 'pending', 'under_review', 'rejected', 'expired'];
+      final rawStatus = e.status;
+      _status = validStatuses.contains(rawStatus) ? rawStatus : 'pending';
       _postedBy = e.postedBy;
       _isVerifiedOrg = e.isVerifiedOrg;
       _imageUrls = List.from(e.imageUrls.isNotEmpty ? e.imageUrls : (e.imageUrl.isNotEmpty ? [e.imageUrl] : []));
@@ -266,9 +270,11 @@ class _EventFormScreenState extends State<EventFormScreen> {
                               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                             ),
                             items: const [
-                              DropdownMenuItem(value: 'active', child: Text('Active (Live)')),
-                              DropdownMenuItem(value: 'pending', child: Text('Pending Review')),
-                              DropdownMenuItem(value: 'rejected', child: Text('Rejected / Draft')),
+                              DropdownMenuItem(value: 'active', child: Text('✅  Active (Live)')),
+                              DropdownMenuItem(value: 'under_review', child: Text('🕐  Under Review')),
+                              DropdownMenuItem(value: 'pending', child: Text('⏳  Pending')),
+                              DropdownMenuItem(value: 'rejected', child: Text('❌  Rejected / Draft')),
+                              DropdownMenuItem(value: 'expired', child: Text('📅  Expired')),
                             ],
                             onChanged: (v) => setState(() => _status = v!),
                           ),

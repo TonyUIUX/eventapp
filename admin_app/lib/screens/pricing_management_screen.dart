@@ -151,7 +151,7 @@ class _PricingManagementScreenState extends ConsumerState<PricingManagementScree
   }
 
   void _openBroadcastWithTemplate() {
-    String template = 'Updates to KochiGo: ';
+    String template = 'Updates to Evorra: ';
     if (_maintenanceMode) template += 'We are currently performing maintenance. ';
     if (!_isFreePeriod) {
       template += 'New posting fee is active: ${_feeLabelController.text}. ';

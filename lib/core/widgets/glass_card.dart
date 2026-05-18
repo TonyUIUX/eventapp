@@ -4,7 +4,7 @@ import '../constants/app_colors.dart';
 import '../constants/app_spacing.dart';
 
 // lib/core/widgets/glass_card.dart
-// Reusable frosted glassmorphism card — KochiGo v3.1
+// Reusable frosted glassmorphism card — Evorra v3.1
 
 class GlassCard extends StatelessWidget {
   final Widget child;

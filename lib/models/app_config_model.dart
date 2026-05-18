@@ -111,7 +111,7 @@ class AppConfigModel {
       promoBannerColor: '#FF5247',
       promoBannerCta: 'Learn More',
       maintenanceMode: false,
-      maintenanceMessage: 'KochiGo is upgrading to serve you better!',
+      maintenanceMessage: 'Evorra is upgrading to serve you better!',
       updatedAt: DateTime.now(),
       updatedBy: 'system',
     );

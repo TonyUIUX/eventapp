@@ -31,7 +31,7 @@ class PaymentService {
     var options = {
       'key': RazorpayConfig.activeKey,
       'amount': amountPaise,
-      'name': 'KochiGo',
+      'name': 'Evorra',
       'description': 'Event Posting Fee',
       'prefill': {'contact': contactPhone, 'email': ''},
       'external': {

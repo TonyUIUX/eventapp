@@ -4,7 +4,7 @@ import '../constants/app_text_styles.dart';
 import '../constants/app_spacing.dart';
 
 // lib/core/widgets/gradient_button.dart
-// Full-width gradient CTA button — KochiGo v3.1
+// Full-width gradient CTA button — Evorra v3.1
 
 class GradientButton extends StatelessWidget {
   final String label;

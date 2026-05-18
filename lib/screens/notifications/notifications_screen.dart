@@ -16,7 +16,7 @@ import '../detail/event_detail_screen.dart';
 import '../../services/firestore_service.dart';
 
 // lib/screens/notifications/notifications_screen.dart
-// Dark glassmorphism Notifications Screen — KochiGo v3.1
+// Dark glassmorphism Notifications Screen — Evorra v3.1
 
 class NotificationsScreen extends ConsumerWidget {
   const NotificationsScreen({super.key});

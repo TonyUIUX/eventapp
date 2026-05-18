@@ -7,7 +7,7 @@ import '../../core/constants/app_spacing.dart';
 import '../../providers/app_config_provider.dart';
 
 // lib/screens/maintenance/maintenance_screen.dart
-// Full dark glassmorphism maintenance screen — KochiGo v3.1
+// Full dark glassmorphism maintenance screen — Evorra v3.1
 
 class MaintenanceScreen extends ConsumerWidget {
   const MaintenanceScreen({super.key});

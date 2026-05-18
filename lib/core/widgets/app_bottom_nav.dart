@@ -4,7 +4,7 @@ import '../constants/app_spacing.dart';
 import 'glass_card.dart';
 
 // lib/core/widgets/app_bottom_nav.dart
-// Floating pill-shaped bottom nav — KochiGo v3.1 design system
+// Floating pill-shaped bottom nav — Evorra v3.1 design system
 
 class AppBottomNav extends StatelessWidget {
   final int currentIndex;

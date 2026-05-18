@@ -113,7 +113,7 @@ class _EventListScreenState extends ConsumerState<EventListScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'KochiGo Admin',
+                      'Evorra Admin',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w800,
@@ -414,7 +414,7 @@ class _AdminEventCard extends StatelessWidget {
           Row(
             children: [
               PopupMenuButton<String>(
-                initialValue: event.status,
+                initialValue: const ['active', 'under_review', 'rejected', 'expired'].contains(event.status) ? event.status : null,
                 onSelected: (status) async {
                   if (status == 'rejected') {
                     final reason = await showDialog<String>(
@@ -456,9 +456,10 @@ class _AdminEventCard extends StatelessWidget {
                   ),
                 ),
                 itemBuilder: (context) => [
-                  const PopupMenuItem(value: 'active', child: Text('Approve / Active')),
-                  const PopupMenuItem(value: 'under_review', child: Text('Set Pending')),
-                  const PopupMenuItem(value: 'rejected', child: Text('Reject')),
+                  const PopupMenuItem(value: 'active', child: Text('✅ Approve / Active')),
+                  const PopupMenuItem(value: 'under_review', child: Text('🕐 Set Under Review')),
+                  const PopupMenuItem(value: 'rejected', child: Text('❌ Reject')),
+                  const PopupMenuItem(value: 'expired', child: Text('📅 Mark Expired')),
                 ],
               ),
               const SizedBox(width: 16),

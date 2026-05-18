@@ -21,7 +21,7 @@ import '../../services/payment_service.dart';
 import 'package:flutter/foundation.dart';
 
 // lib/screens/home/home_screen.dart
-// Full dark glassmorphism HomeScreen — KochiGo v3.1
+// Full dark glassmorphism HomeScreen — Evorra v3.1
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -88,7 +88,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     AppColors.brandGradient.createShader(bounds),
                 blendMode: BlendMode.srcIn,
                 child: const Text(
-                  'Vivra',
+                  'Evorra',
                   style: TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 26,

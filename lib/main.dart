@@ -65,14 +65,14 @@ Future<void> main() async {
 
   runApp(
     ProviderScope(
-      child: KochiGoApp(showOnboarding: !hasSeenOnboarding),
+      child: EvorraApp(showOnboarding: !hasSeenOnboarding),
     ),
   );
 }
 
-class KochiGoApp extends ConsumerWidget {
+class EvorraApp extends ConsumerWidget {
   final bool showOnboarding;
-  const KochiGoApp({super.key, this.showOnboarding = false});
+  const EvorraApp({super.key, this.showOnboarding = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -84,7 +84,7 @@ class KochiGoApp extends ConsumerWidget {
     });
 
     return MaterialApp(
-      title: 'Vivra',
+      title: 'Evorra',
       debugShowCheckedModeBanner: false,
       theme: AppTheme().darkTheme,
       themeMode: ThemeMode.dark,

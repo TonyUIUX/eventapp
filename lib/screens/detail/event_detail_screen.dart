@@ -18,7 +18,7 @@ import '../../core/widgets/tap_scale.dart';
 import '../../core/widgets/gradient_button.dart';
 
 // lib/screens/detail/event_detail_screen.dart
-// Dark glassmorphism detail screen — KochiGo v3.1
+// Dark glassmorphism detail screen — Evorra v3.1
 
 class EventDetailScreen extends ConsumerWidget {
   final EventModel event;
@@ -224,7 +224,7 @@ class EventDetailScreen extends ConsumerWidget {
   void _handleShare(EventModel event) {
     AnalyticsService.instance.logShare(event.id, event.title);
     Share.share(
-      '🎉 ${event.title}\n📅 ${AppDateUtils.formatDetailDate(event.date)}\n📍 ${event.location}\n\nDiscover more on Vivra!',
+      '🎉 ${event.title}\n📅 ${AppDateUtils.formatDetailDate(event.date)}\n📍 ${event.location}\n\nDiscover more on Evorra!',
       subject: event.title,
     );
   }

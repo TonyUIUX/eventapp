@@ -9,7 +9,7 @@ import '../../core/widgets/gradient_button.dart';
 import '../../main.dart';
 
 // lib/screens/onboarding/onboarding_screen.dart
-// Dark glassmorphism Onboarding Screen — KochiGo v3.1
+// Dark glassmorphism Onboarding Screen — Evorra v3.1
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -122,17 +122,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     },
                     children: const [
                       _OnboardingPage(
-                        emoji: '🎭',
+                        imagePath: 'assets/images/onboarding_1.png',
                         title: 'Discover Events\nAround You',
                         body: 'Find the best concerts, workshops, and meetups happening in your city.',
                       ),
                       _OnboardingPage(
-                        emoji: '📅',
+                        imagePath: 'assets/images/onboarding_2.png',
                         title: 'Today. This Weekend.\nAll Week.',
                         body: 'Never miss out. See exactly what is happening right now or plan ahead.',
                       ),
                       _OnboardingPage(
-                        emoji: '🔖',
+                        imagePath: 'assets/images/onboarding_3.png',
                         title: 'Post. Promote.\nEarn.',
                         body: 'Host your own events, reach a larger audience, and track your success.',
                       ),
@@ -188,12 +188,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 }
 
 class _OnboardingPage extends StatelessWidget {
-  final String emoji;
+  final String imagePath;
   final String title;
   final String body;
 
   const _OnboardingPage({
-    required this.emoji,
+    required this.imagePath,
     required this.title,
     required this.body,
   });
@@ -207,7 +207,13 @@ class _OnboardingPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(emoji, style: const TextStyle(fontSize: 64)),
+            Center(
+              child: Image.asset(
+                imagePath,
+                height: 280,
+                fit: BoxFit.contain,
+              ),
+            ),
             const SizedBox(height: AppSpacing.xl),
             Text(
               title,

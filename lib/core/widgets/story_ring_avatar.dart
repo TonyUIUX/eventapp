@@ -5,7 +5,7 @@ import '../constants/app_text_styles.dart';
 import 'tap_scale.dart';
 
 // lib/core/widgets/story_ring_avatar.dart
-// Gradient-ringed avatar widget — like Instagram stories — KochiGo v3.1
+// Gradient-ringed avatar widget — like Instagram stories — Evorra v3.1
 
 class StoryRingAvatar extends StatelessWidget {
   final String? imageUrl;

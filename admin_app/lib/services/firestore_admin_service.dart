@@ -45,7 +45,7 @@ class FirestoreAdminService {
 
       if (status == 'active') {
         title = 'Event Approved! 🎉';
-        body = 'Your event "$eventTitle" is now live on KochiGo.';
+        body = 'Your event "$eventTitle" is now live on Evorra.';
         type = 'event_approved';
       } else if (status == 'rejected') {
         title = 'Event Update Required ⚠️';

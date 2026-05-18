@@ -10,7 +10,7 @@ import '../../core/widgets/gradient_button.dart';
 import '../home/widgets/event_card.dart';
 
 // lib/screens/saved/saved_screen.dart
-// Dark glassmorphism Saved Screen — KochiGo v3.1
+// Dark glassmorphism Saved Screen — Evorra v3.1
 
 class SavedScreen extends ConsumerWidget {
   const SavedScreen({super.key});

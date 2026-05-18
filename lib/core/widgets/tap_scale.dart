@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 // lib/core/widgets/tap_scale.dart
-// Physical press feel for any tappable widget — KochiGo v3.1
+// Physical press feel for any tappable widget — Evorra v3.1
 // Wrap ANY tappable widget with TapScale for premium interaction feedback.
 
 class TapScale extends StatefulWidget {

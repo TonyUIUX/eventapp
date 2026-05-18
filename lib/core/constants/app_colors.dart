@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 // lib/core/constants/app_colors.dart
-// Dark Glassmorphism Design System — KochiGo v3.1
+// Dark Glassmorphism Design System — Evorra v3.1
 
 class AppColors {
 
@@ -19,7 +19,7 @@ class AppColors {
 
   // ── BRAND GRADIENT (Primary) ───────────────────────────────────
   // Coral stays as brand anchor. Paired with deep purple.
-  static const Color brandCoral   = Color(0xFFFF5247); // KochiGo coral
+  static const Color brandCoral   = Color(0xFFFF5247); // Evorra coral
   static const Color brandPurple  = Color(0xFF7C3AFF); // Deep violet
   static const Color brandPink    = Color(0xFFE040FB); // Vivid magenta
 

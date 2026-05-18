@@ -14,7 +14,7 @@ import '../../../core/widgets/dark_shimmer.dart';
 import '../../detail/event_detail_screen.dart';
 
 // lib/screens/home/widgets/event_card.dart
-// Dark glassmorphism EventCard — KochiGo v3.1 (doc 26 spec)
+// Dark glassmorphism EventCard — Evorra v3.1 (doc 26 spec)
 
 class EventCard extends ConsumerWidget {
   final EventModel event;

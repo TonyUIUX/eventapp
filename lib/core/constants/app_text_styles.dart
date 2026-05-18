@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
 // lib/core/constants/app_text_styles.dart
-// Dark Glassmorphism Typography — KochiGo v3.1
+// Dark Glassmorphism Typography — Evorra v3.1
 
 class AppTextStyles {
   // Font family: Poppins (bundled as asset in pubspec.yaml)

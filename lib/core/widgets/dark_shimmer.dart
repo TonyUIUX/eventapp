@@ -4,7 +4,7 @@ import '../constants/app_spacing.dart';
 import 'glass_card.dart';
 
 // lib/core/widgets/dark_shimmer.dart
-// Dark-mode shimmer loading placeholders — KochiGo v3.1
+// Dark-mode shimmer loading placeholders — Evorra v3.1
 // Replace ALL existing shimmer usages with DarkShimmer/EventCardSkeleton.
 
 class DarkShimmer extends StatelessWidget {

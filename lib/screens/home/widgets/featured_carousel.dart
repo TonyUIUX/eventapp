@@ -15,7 +15,7 @@ import '../../../services/analytics_service.dart';
 import '../../detail/event_detail_screen.dart';
 
 // lib/screens/home/widgets/featured_carousel.dart
-// Dark glassmorphism featured carousel — KochiGo v3.1
+// Dark glassmorphism featured carousel — Evorra v3.1
 
 class FeaturedCarousel extends ConsumerStatefulWidget {
   const FeaturedCarousel({super.key});

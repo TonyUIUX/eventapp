@@ -3,7 +3,7 @@ import '../constants/app_colors.dart';
 import '../constants/app_text_styles.dart';
 
 // lib/core/theme/app_theme.dart
-// Dark-only ThemeData — KochiGo v3.1
+// Dark-only ThemeData — Evorra v3.1
 // App is dark-only. No light theme.
 
 class AppTheme {
