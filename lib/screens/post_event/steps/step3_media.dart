@@ -56,7 +56,7 @@ class Step3Media extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('COVER PHOTO (REQUIRED)', style: AppTextStyles.caption.copyWith(color: AppColors.brandCoral)),
+          Text('COVER PHOTO (OPTIONAL)', style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
           const SizedBox(height: AppSpacing.sm),
           
           if (formData.images.isEmpty)

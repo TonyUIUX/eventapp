@@ -130,7 +130,19 @@ final searchResultsProvider =
   if (query.isEmpty) return const AsyncValue.data([]);
 
   return eventsAsync.whenData((events) {
+    final now = DateTime.now().toLocal();
+    final today = DateTime(now.year, now.month, now.day);
+
     return events.where((event) {
+      // Guard: skip if not active/published
+      if (!event.isActive || event.status != 'active') return false;
+
+      // Guard: skip if expired (date is in the past)
+      final localEventDate = event.date.toLocal();
+      final eventDate = DateTime(
+          localEventDate.year, localEventDate.month, localEventDate.day);
+      if (eventDate.isBefore(today)) return false;
+
       return event.title.toLowerCase().contains(query) ||
           event.description.toLowerCase().contains(query) ||
           event.location.toLowerCase().contains(query) ||

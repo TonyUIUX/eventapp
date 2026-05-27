@@ -368,9 +368,7 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
         }
         break;
       case 2:
-        if (_formData.images.isEmpty) {
-          error = 'Please add at least one image.';
-        }
+        // Image is now optional
         break;
       case 3:
         if (_formData.organizer.isEmpty) {
