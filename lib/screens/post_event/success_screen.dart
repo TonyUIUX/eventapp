@@ -5,6 +5,7 @@ import '../../core/constants/app_text_styles.dart';
 import '../../core/constants/app_spacing.dart';
 import '../../core/widgets/gradient_button.dart';
 import '../../core/widgets/tap_scale.dart';
+import '../../main.dart';
 
 // lib/screens/post_event/success_screen.dart
 // Post success representation page — Evorra v3.1
@@ -119,7 +120,13 @@ class _SuccessScreenState extends State<SuccessScreen> with SingleTickerProvider
                     child: GradientButton(
                       label: 'Back to Home',
                       height: 56,
-                      onTap: () => Navigator.popUntil(context, (route) => route.isFirst),
+                      onTap: () {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (_) => const MainShell()),
+                          (route) => false,
+                        );
+                      },
                     ),
                   ),
                   const SizedBox(height: AppSpacing.md),
@@ -128,7 +135,11 @@ class _SuccessScreenState extends State<SuccessScreen> with SingleTickerProvider
                     height: 56,
                     child: TapScale(
                       onTap: () {
-                        Navigator.popUntil(context, (route) => route.isFirst);
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (_) => const MainShell()),
+                          (route) => false,
+                        );
                       },
                       child: Container(
                         alignment: Alignment.center,

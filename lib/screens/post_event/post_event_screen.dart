@@ -237,6 +237,7 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
     return AuthGate(
       reason: 'Sign in to post your events to the community.',
       child: PopScope(
@@ -323,7 +324,7 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
                     ),
                   ],
                 ),
-          bottomNavigationBar: _currentStep < 4 && _isDraftLoaded
+          bottomNavigationBar: _currentStep < 4 && _isDraftLoaded && !isKeyboardOpen
               ? SafeArea(
                   child: Padding(
                     padding: const EdgeInsets.all(AppSpacing.xl),

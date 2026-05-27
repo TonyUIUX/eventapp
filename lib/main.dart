@@ -224,6 +224,7 @@ class _MainShellState extends ConsumerState<MainShell> {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundBase,
+      resizeToAvoidBottomInset: false,
       // No bottomNavigationBar — nav floats over content via Stack.
       body: Stack(
         children: [
