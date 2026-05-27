@@ -101,7 +101,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   onPressed: () => Navigator.push(
                     context,
-                    SlideUpFadeRoute(page: const SearchScreen()),
+                    SlideUpFadeRoute(page: const SearchScreen(isTab: false)),
                   ),
                 ),
                 if (kDebugMode) ...[

@@ -16,7 +16,8 @@ import '../home/widgets/event_card.dart';
 // Dark glassmorphism search screen — Evorra v3.1
 
 class SearchScreen extends ConsumerStatefulWidget {
-  const SearchScreen({super.key});
+  final bool isTab;
+  const SearchScreen({super.key, this.isTab = true});
 
   @override
   ConsumerState<SearchScreen> createState() => _SearchScreenState();
@@ -85,13 +86,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary, size: 20),
-          onPressed: () => Navigator.pop(context),
-        ),
+        automaticallyImplyLeading: false,
+        leading: widget.isTab
+            ? null
+            : IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary, size: 20),
+                onPressed: () => Navigator.pop(context),
+              ),
         titleSpacing: 0,
         title: Padding(
-          padding: const EdgeInsets.only(right: AppSpacing.md),
+          padding: EdgeInsets.only(
+            left: widget.isTab ? AppSpacing.md : 0,
+            right: AppSpacing.md,
+          ),
           child: Container(
             height: 44,
             decoration: BoxDecoration(
