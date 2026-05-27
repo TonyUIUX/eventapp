@@ -13,6 +13,9 @@ import '../../core/widgets/dark_shimmer.dart';
 import '../../core/widgets/staggered_list.dart';
 import 'widgets/event_card.dart';
 import 'widgets/featured_carousel.dart';
+import 'widgets/category_filter_bar.dart';
+import 'widgets/date_toggle.dart';
+import 'widgets/promo_banner.dart';
 import '../search/search_screen.dart';
 import '../../services/event_post_service.dart';
 import '../../models/post_event_form_data.dart';
@@ -30,21 +33,10 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  bool _promoDismissed = false;
-
-  // Map UI index → provider string value
-  static const List<String> _dateFilters = ['Today', 'Weekend', 'This Week'];
-  static const List<String> _dateFilterKeys = ['today', 'weekend', 'week'];
-
-  static const List<String> _categories = [
-    'all', 'music', 'comedy', 'tech', 'fitness', 'art', 'workshop', 'food', 'business',
-  ];
-
   @override
   Widget build(BuildContext context) {
     final filteredAsync = ref.watch(filteredEventsProvider);
     final isOffline = ref.watch(isOfflineProvider);
-    final configAsync = ref.watch(appConfigProvider);
 
     // Preload featured images
     ref.listen(featuredEventsProvider, (_, next) {
@@ -56,9 +48,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         }
       });
     });
-
-    final showPromo = !_promoDismissed &&
-        (configAsync.valueOrNull?.showPromoBanner ?? false);
 
     return Scaffold(
       backgroundColor: AppColors.backgroundBase,
@@ -190,42 +179,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
 
             // ── Promo Banner ────────────────────────────────────────────
-            if (showPromo)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.md, AppSpacing.md, AppSpacing.md, 0),
-                  child: _PromoBanner(
-                    message: configAsync.valueOrNull?.promoBannerText ??
-                        'Something exciting is coming!',
-                    onDismiss: () => setState(() => _promoDismissed = true),
-                  ),
-                ),
-              ),
-
+            const SliverToBoxAdapter(
+              child: PromoBanner(),
+            ),
 
             // ── Date Filter Toggle ──────────────────────────────────────
-            SliverToBoxAdapter(
-              child: _DateFilterBar(
-                selected: _dateFilterKeys.indexOf(
-                  ref.watch(selectedDateFilterProvider)),
-                filters: _dateFilters,
-                onSelect: (i) {
-                  ref.read(selectedDateFilterProvider.notifier).state =
-                      _dateFilterKeys[i];
-                },
-              ),
+            const SliverToBoxAdapter(
+              child: DateToggle(),
             ),
 
             // ── Category Chips ──────────────────────────────────────────
-            SliverToBoxAdapter(
-              child: _CategoryFilterBar(
-                selected: ref.watch(selectedCategoryProvider),
-                categories: _categories,
-                onSelect: (cat) {
-                  ref.read(selectedCategoryProvider.notifier).state = cat;
-                },
-              ),
+            const SliverToBoxAdapter(
+              child: CategoryFilterBar(),
             ),
 
             // ── Featured Carousel ───────────────────────────────────────
@@ -286,163 +251,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 }
 
 
-
-// ── Date Filter Bar ───────────────────────────────────────────────────────────
-class _DateFilterBar extends StatelessWidget {
-  final int selected;
-  final List<String> filters;
-  final ValueChanged<int> onSelect;
-
-  const _DateFilterBar({
-    required this.selected,
-    required this.filters,
-    required this.onSelect,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 44,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.fromLTRB(
-            AppSpacing.md, 0, AppSpacing.md, AppSpacing.xs),
-        itemCount: filters.length,
-        itemBuilder: (context, index) {
-          final isSelected = index == selected;
-          return GestureDetector(
-            onTap: () => onSelect(index),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              curve: Curves.easeOutCubic,
-              margin: const EdgeInsets.only(right: AppSpacing.sm),
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-              decoration: BoxDecoration(
-                gradient: isSelected ? AppColors.brandGradient : null,
-                color: isSelected ? null : AppColors.glassSurface,
-                borderRadius: BorderRadius.circular(AppRadius.pill),
-                border: Border.all(
-                  color: isSelected ? Colors.transparent : AppColors.glassBorder,
-                ),
-              ),
-              child: Text(
-                filters[index],
-                style: AppTextStyles.label.copyWith(
-                  color: isSelected
-                      ? Colors.white
-                      : AppColors.textSecondary,
-                  fontWeight:
-                      isSelected ? FontWeight.w700 : FontWeight.w500,
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-// ── Category Filter Bar ───────────────────────────────────────────────────────
-class _CategoryFilterBar extends StatelessWidget {
-  final String selected;
-  final List<String> categories;
-  final ValueChanged<String> onSelect;
-
-  const _CategoryFilterBar({
-    required this.selected,
-    required this.categories,
-    required this.onSelect,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 48,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.fromLTRB(
-            AppSpacing.md, AppSpacing.xs, AppSpacing.md, AppSpacing.xs),
-        itemCount: categories.length,
-        itemBuilder: (context, index) {
-          final cat = categories[index];
-          final isSelected = cat == selected;
-          final gradient = cat == 'all'
-              ? AppColors.brandGradient
-              : (AppColors.categoryGradients[cat] ?? AppColors.brandGradient);
-
-          return GestureDetector(
-            onTap: () => onSelect(cat),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              curve: Curves.easeOutCubic,
-              margin: const EdgeInsets.only(right: AppSpacing.sm),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              decoration: BoxDecoration(
-                gradient: isSelected ? gradient : null,
-                color: isSelected ? null : AppColors.glassSurface,
-                borderRadius: BorderRadius.circular(AppRadius.pill),
-                border: Border.all(
-                  color: isSelected ? Colors.transparent : AppColors.glassBorder,
-                ),
-              ),
-              child: Text(
-                cat == 'all'
-                    ? '✦ All'
-                    : cat[0].toUpperCase() + cat.substring(1),
-                style: AppTextStyles.label.copyWith(
-                  color: isSelected ? Colors.white : AppColors.textSecondary,
-                  fontWeight:
-                      isSelected ? FontWeight.w700 : FontWeight.w500,
-                  letterSpacing: 0.3,
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-// ── Promo Banner ──────────────────────────────────────────────────────────────
-class _PromoBanner extends StatelessWidget {
-  final String message;
-  final VoidCallback onDismiss;
-
-  const _PromoBanner({required this.message, required this.onDismiss});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md, vertical: AppSpacing.sm),
-      decoration: BoxDecoration(
-        color: AppColors.glassSurface,
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: AppColors.brandCoral.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.local_fire_department_rounded,
-              color: AppColors.brandCoral, size: 18),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
-              message,
-              style: AppTextStyles.label.copyWith(color: AppColors.brandCoral),
-            ),
-          ),
-          GestureDetector(
-            onTap: onDismiss,
-            child: const Icon(Icons.close_rounded,
-                size: 16, color: AppColors.textTertiary),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 // ── Loading State ─────────────────────────────────────────────────────────────
 class _LoadingState extends StatelessWidget {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_spacing.dart';
 import 'glass_card.dart';
+import 'tap_scale.dart';
 
 // lib/core/widgets/app_bottom_nav.dart
 // Floating pill-shaped bottom nav — Evorra v3.1 design system
@@ -21,9 +22,9 @@ class AppBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 28),
+      padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.xl),
       child: GlassCard(
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
+        padding: const EdgeInsets.all(AppSpacing.sm),
         borderRadius: AppRadius.pill,
         blur: 30,
         child: Row(
@@ -86,15 +87,14 @@ class _NavItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isSelected = index == currentIndex;
-    final color = isSelected ? AppColors.brandCoral : AppColors.textTertiary;
+    final color = isSelected ? AppColors.brandCoral : AppColors.textSecondary;
 
-    return GestureDetector(
+    return TapScale(
       onTap: () => onTap(index),
-      behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(AppSpacing.sm + 2),
         decoration: BoxDecoration(
           color: isSelected
               ? AppColors.brandCoral.withValues(alpha: 0.12)
@@ -152,7 +152,7 @@ class _PostButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return TapScale(
       onTap: onTap,
       child: Container(
         width: 52,
@@ -174,4 +174,3 @@ class _PostButton extends StatelessWidget {
     );
   }
 }
-
