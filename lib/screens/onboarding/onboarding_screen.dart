@@ -6,6 +6,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
 import '../../core/constants/app_spacing.dart';
 import '../../core/widgets/gradient_button.dart';
+import '../../core/utils/app_router.dart';
 import '../../main.dart';
 
 // lib/screens/onboarding/onboarding_screen.dart
@@ -40,7 +41,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     if (hasSeen && mounted) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const MainShell()),
+        SlideUpFadeRoute(page: const MainShell()),
       );
     }
   }
@@ -51,7 +52,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     if (!mounted) return;
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => const MainShell()),
+      SlideUpFadeRoute(page: const MainShell()),
     );
   }
 

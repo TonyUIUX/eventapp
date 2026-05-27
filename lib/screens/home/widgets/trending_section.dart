@@ -5,7 +5,9 @@ import '../../../models/event_model.dart';
 import '../../../providers/events_provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_text_styles.dart';
-import '../../../core/constants/app_constants.dart';
+import '../../../core/constants/app_spacing.dart';
+import '../../../core/utils/app_router.dart';
+import '../../../core/widgets/tap_scale.dart';
 import '../../detail/event_detail_screen.dart';
 
 class TrendingSection extends ConsumerWidget {
@@ -30,12 +32,12 @@ class TrendingSection extends ConsumerWidget {
               child: Row(
                 children: [
                   const Text('Trending Now', style: AppTextStyles.heading2),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppSpacing.sm),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(AppRadius.xs),
+                      color: AppColors.brandCoral.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
                     ),
                     child: const Text('🔥', style: TextStyle(fontSize: 12)),
                   ),
@@ -73,11 +75,11 @@ class _TrendingCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final trendingCount = (event.id.hashCode.abs() % 40) + 12;
 
-    return GestureDetector(
+    return TapScale(
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => EventDetailScreen(event: event)),
+          SlideUpFadeRoute(page: EventDetailScreen(event: event)),
         );
       },
       child: Container(
@@ -125,26 +127,26 @@ class _TrendingCard extends StatelessWidget {
                   ),
                 ),
                 Positioned(
-                  bottom: 8,
-                  right: 8,
+                  bottom: AppSpacing.sm,
+                  right: AppSpacing.sm,
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.7),
-                      borderRadius: BorderRadius.circular(AppRadius.xs),
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
                     ),
                     child: Text(
                       '🔥 $trendingCount',
-                      style: AppTextStyles.caption.copyWith(color: Colors.white, fontSize: 10),
+                      style: AppTextStyles.caption.copyWith(color: Colors.white),
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               event.title,
-              style: AppTextStyles.bodyBold.copyWith(fontSize: 13, height: 1.2),
+              style: AppTextStyles.label.copyWith(height: 1.2),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),

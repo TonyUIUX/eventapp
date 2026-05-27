@@ -5,6 +5,10 @@ import '../../../core/constants/app_text_styles.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../providers/app_config_provider.dart';
 import '../../../core/utils/url_utils.dart';
+import '../../../core/widgets/tap_scale.dart';
+
+// lib/screens/home/widgets/promo_banner.dart
+// Dark glassmorphism promo banner — Evorra v3.1
 
 class PromoBanner extends ConsumerStatefulWidget {
   const PromoBanner({super.key});
@@ -51,7 +55,7 @@ class _PromoBannerState extends ConsumerState<PromoBanner> {
         return Container(
           width: double.infinity,
           margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
           decoration: BoxDecoration(
             color: Color(int.parse(config.promoBannerColor.replaceFirst('#', '0xFF'))),
             borderRadius: BorderRadius.circular(AppRadius.md),
@@ -59,7 +63,7 @@ class _PromoBannerState extends ConsumerState<PromoBanner> {
           child: Row(
             children: [
               const Icon(Icons.celebration_rounded, color: Colors.orangeAccent, size: 20),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,8 +76,8 @@ class _PromoBannerState extends ConsumerState<PromoBanner> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     if (config.promoBannerCta.isNotEmpty && config.promoBannerLink != null) ...[
-                      const SizedBox(height: 4),
-                      GestureDetector(
+                      const SizedBox(height: AppSpacing.xs),
+                      TapScale(
                         onTap: () => AppUrlUtils.openUrl(config.promoBannerLink!, context),
                         child: Text(
                           config.promoBannerCta,
@@ -84,7 +88,7 @@ class _PromoBannerState extends ConsumerState<PromoBanner> {
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               IconButton(
                 icon: const Icon(Icons.close_rounded, color: Colors.white54, size: 18),
                 onPressed: _dismiss,

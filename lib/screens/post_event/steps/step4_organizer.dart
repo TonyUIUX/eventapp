@@ -5,6 +5,9 @@ import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/widgets/tap_scale.dart';
 
+// lib/screens/post_event/steps/step4_organizer.dart
+// Form step 4 — Evorra v3.1
+
 class Step4Organizer extends StatelessWidget {
   final PostEventFormData formData;
   final VoidCallback onUpdate;
@@ -26,14 +29,14 @@ class Step4Organizer extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('ORGANIZER DETAILS', style: AppTextStyles.caption.copyWith(color: AppColors.brandCoral)),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           _GlassTextField(
             initialValue: formData.organizer,
             hintText: 'Organizer Name (Required)',
             icon: Icons.business_rounded,
             onChanged: (v) { formData.organizer = v; onUpdate(); },
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           _GlassTextField(
             initialValue: formData.contactPhone,
             hintText: 'Contact Phone',
@@ -41,14 +44,14 @@ class Step4Organizer extends StatelessWidget {
             keyboardType: TextInputType.phone,
             onChanged: (v) { formData.contactPhone = v; onUpdate(); },
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           _GlassTextField(
             initialValue: formData.contactInstagram,
             hintText: 'Instagram Handle (@username)',
             icon: Icons.alternate_email_rounded,
             onChanged: (v) { formData.contactInstagram = v; onUpdate(); },
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           _GlassTextField(
             initialValue: formData.website,
             hintText: 'Website (Optional)',
@@ -56,16 +59,16 @@ class Step4Organizer extends StatelessWidget {
             onChanged: (v) { formData.website = v; onUpdate(); },
           ),
           
-          const SizedBox(height: 32),
+          const SizedBox(height: AppSpacing.xl),
           
           Text('TAGS', style: AppTextStyles.caption.copyWith(color: AppColors.brandCoral)),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Text('Select up to 3 tags to help people find your event.', style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary)),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           
           Wrap(
-            spacing: 10,
-            runSpacing: 10,
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
             children: _availableTags.map((tag) {
               final isSelected = formData.tags.contains(tag);
               return TapScale(
@@ -78,7 +81,7 @@ class Step4Organizer extends StatelessWidget {
                   onUpdate();
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
                   decoration: BoxDecoration(
                     gradient: isSelected ? AppColors.brandGradient : null,
                     color: isSelected ? null : AppColors.glassSurface,
@@ -95,7 +98,7 @@ class Step4Organizer extends StatelessWidget {
               );
             }).toList(),
           ),
-          const SizedBox(height: 48), // Bottom padding
+          const SizedBox(height: AppSpacing.xxl), // Bottom padding
         ],
       ),
     );
@@ -142,7 +145,7 @@ class _GlassTextField extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppRadius.md),
           borderSide: const BorderSide(color: AppColors.brandCoral),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.all(AppSpacing.md),
       ),
     );
   }

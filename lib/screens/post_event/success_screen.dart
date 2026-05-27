@@ -4,8 +4,10 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
 import '../../core/constants/app_spacing.dart';
 import '../../core/widgets/gradient_button.dart';
+import '../../core/widgets/tap_scale.dart';
 
 // lib/screens/post_event/success_screen.dart
+// Post success representation page — Evorra v3.1
 
 class SuccessScreen extends StatefulWidget {
   const SuccessScreen({super.key});
@@ -65,7 +67,7 @@ class _SuccessScreenState extends State<SuccessScreen> with SingleTickerProvider
                   ScaleTransition(
                     scale: _scaleAnimation,
                     child: Container(
-                      padding: const EdgeInsets.all(24),
+                      padding: const EdgeInsets.all(AppSpacing.lg),
                       decoration: BoxDecoration(
                         color: AppColors.success.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
@@ -85,7 +87,7 @@ class _SuccessScreenState extends State<SuccessScreen> with SingleTickerProvider
                       ),
                     ),
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: AppSpacing.xl),
                   
                   Container(
                     padding: const EdgeInsets.all(AppSpacing.xl),
@@ -101,7 +103,7 @@ class _SuccessScreenState extends State<SuccessScreen> with SingleTickerProvider
                           style: AppTextStyles.heading1.copyWith(color: Colors.white),
                           textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: AppSpacing.md),
                         Text(
                           'Your event has been sent to our moderators. It will be live as soon as it is approved.',
                           style: AppTextStyles.body.copyWith(color: AppColors.textSecondary, height: 1.5),
@@ -111,7 +113,7 @@ class _SuccessScreenState extends State<SuccessScreen> with SingleTickerProvider
                     ),
                   ),
                   
-                  const SizedBox(height: 48),
+                  const SizedBox(height: AppSpacing.xxl),
                   SizedBox(
                     width: double.infinity,
                     child: GradientButton(
@@ -124,17 +126,21 @@ class _SuccessScreenState extends State<SuccessScreen> with SingleTickerProvider
                   SizedBox(
                     width: double.infinity,
                     height: 56,
-                    child: OutlinedButton(
-                      onPressed: () {
+                    child: TapScale(
+                      onTap: () {
                         Navigator.popUntil(context, (route) => route.isFirst);
-                        // Can add navigation to user's profile events here
                       },
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        side: const BorderSide(color: AppColors.glassBorder),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+                      child: Container(
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.glassBorder),
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                        ),
+                        child: Text(
+                          'View My Events',
+                          style: AppTextStyles.label.copyWith(color: Colors.white),
+                        ),
                       ),
-                      child: const Text('View My Events', style: AppTextStyles.label),
                     ),
                   ),
                 ],

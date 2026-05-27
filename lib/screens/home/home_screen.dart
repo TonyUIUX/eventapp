@@ -14,7 +14,6 @@ import '../../core/widgets/staggered_list.dart';
 import 'widgets/event_card.dart';
 import 'widgets/featured_carousel.dart';
 import '../search/search_screen.dart';
-import '../post_event/post_event_screen.dart';
 import '../../services/event_post_service.dart';
 import '../../models/post_event_form_data.dart';
 import '../../services/payment_service.dart';
@@ -87,12 +86,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 shaderCallback: (bounds) =>
                     AppColors.brandGradient.createShader(bounds),
                 blendMode: BlendMode.srcIn,
-                child: const Text(
+                child: Text(
                   'Evorra',
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
+                  style: AppTextStyles.display.copyWith(
                     fontSize: 26,
-                    fontWeight: FontWeight.w800,
                     color: Colors.white,
                     letterSpacing: -0.5,
                   ),
@@ -163,7 +160,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     },
                   ),
                 ],
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
               ],
             ),
 
@@ -179,7 +176,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     children: [
                       const Icon(Icons.wifi_off_rounded,
                           size: 14, color: AppColors.warning),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.sm),
                       Text(
                         'Offline • Showing cached events',
                         style: AppTextStyles.caption.copyWith(

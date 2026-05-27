@@ -50,7 +50,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Upload failed: $e', style: const TextStyle(color: Colors.white)),
+            content: Text('Upload failed: $e', style: AppTextStyles.body.copyWith(color: AppColors.textPrimary)),
             backgroundColor: AppColors.backgroundCard,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
@@ -97,7 +97,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Error saving profile: $e', style: const TextStyle(color: Colors.white)),
+          content: Text('Error saving profile: $e', style: AppTextStyles.body.copyWith(color: AppColors.textPrimary)),
           backgroundColor: AppColors.backgroundCard,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
@@ -116,7 +116,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     return Scaffold(
       backgroundColor: AppColors.backgroundBase,
       appBar: AppBar(
-        backgroundColor: AppColors.backgroundBase,
+        backgroundColor: Colors.transparent,
         title: Text('Edit Profile', style: AppTextStyles.heading2.copyWith(color: Colors.white)),
         centerTitle: true,
         elevation: 0,
@@ -175,27 +175,27 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: AppSpacing.xxl),
               
               _EditGlassTextField(
                 controller: _nameController,
                 labelText: 'Display Name',
                 validator: (v) => v == null || v.isEmpty ? 'Name is required' : null,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               _EditGlassTextField(
                 controller: _bioController,
                 labelText: 'Bio',
                 maxLines: 3,
                 maxLength: 120,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               _EditGlassTextField(
                 controller: _instagramController,
                 labelText: 'Instagram Handle',
                 hintText: '@username',
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               _EditGlassTextField(
                 controller: _websiteController,
                 labelText: 'Website',

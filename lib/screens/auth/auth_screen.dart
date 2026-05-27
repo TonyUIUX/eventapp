@@ -221,10 +221,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
                             child: Center(
                               child: Text(
                                 'G',
-                                style: TextStyle(
+                                style: AppTextStyles.label.copyWith(
                                   color: Colors.blueAccent.shade700,
                                   fontWeight: FontWeight.w800,
-                                  fontSize: 14,
                                   height: 1,
                                 ),
                               ),

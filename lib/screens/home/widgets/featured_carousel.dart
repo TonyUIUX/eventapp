@@ -281,18 +281,17 @@ class _CarouselCard extends StatelessWidget {
                       gradient: AppColors.brandGradient,
                       borderRadius: BorderRadius.circular(AppRadius.pill),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.star_rounded,
+                        const Icon(Icons.star_rounded,
                             size: 11, color: Colors.white),
-                        SizedBox(width: 4),
+                        const SizedBox(width: 4),
                         Text(
                           'FEATURED',
-                          style: TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w800,
+                          style: AppTextStyles.caption.copyWith(
                             color: Colors.white,
+                            fontWeight: FontWeight.w800,
                             letterSpacing: 0.5,
                           ),
                         ),

@@ -6,6 +6,7 @@ import '../models/event_model.dart';
 import '../providers/events_provider.dart';
 import '../screens/detail/event_detail_screen.dart';
 import '../core/constants/app_colors.dart';
+import '../core/utils/app_router.dart';
 import '../core/constants/app_spacing.dart';
 import '../core/constants/app_text_styles.dart';
 
@@ -72,9 +73,7 @@ class DeepLinkService {
         final event = events.firstWhere((e) => e.id == eventId);
         Navigator.push(
           ctx,
-          MaterialPageRoute(
-            builder: (_) => EventDetailScreen(event: event),
-          ),
+          SlideUpFadeRoute(page: EventDetailScreen(event: event)),
         );
       } catch (e) {
         debugPrint('Event not found for deep link: $eventId');

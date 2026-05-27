@@ -37,7 +37,7 @@ class EventCard extends ConsumerWidget {
         AnalyticsService.instance.logEventSaved(event.id, saved: !isSaved);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(isSaved ? 'Removed from saved' : 'Event saved ✓', style: const TextStyle(color: Colors.white)),
+            content: Text(isSaved ? 'Removed from saved' : 'Event saved ✓', style: AppTextStyles.body.copyWith(color: AppColors.textPrimary)),
             duration: const Duration(seconds: 2),
             backgroundColor: AppColors.backgroundCard,
             behavior: SnackBarBehavior.floating,
@@ -309,7 +309,6 @@ class _TagChip extends StatelessWidget {
         '#$tag',
         style: AppTextStyles.caption.copyWith(
           color: AppColors.textSecondary,
-          fontSize: 10,
         ),
       ),
     );

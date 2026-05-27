@@ -11,8 +11,10 @@ import '../../services/event_post_service.dart';
 import '../../services/storage_service.dart';
 import '../../core/auth_gate.dart';
 import '../../core/widgets/gradient_button.dart';
+import '../../core/utils/app_router.dart';
 import '../../main.dart'; // Add this import for MainShell
 import 'success_screen.dart';
+import '../../core/widgets/dark_shimmer.dart';
 
 import 'steps/step1_basics.dart';
 import 'steps/step2_details.dart';
@@ -165,7 +167,7 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Payment Failed: $error', style: const TextStyle(color: Colors.white)), 
+                  content: Text('Payment Failed: $error', style: AppTextStyles.body.copyWith(color: AppColors.textPrimary)), 
                   backgroundColor: AppColors.backgroundCard,
                   behavior: SnackBarBehavior.floating,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: AppColors.glassBorder)),
@@ -188,7 +190,7 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Submission failed: $e', style: const TextStyle(color: Colors.white)), 
+            content: Text('Submission failed: $e', style: AppTextStyles.body.copyWith(color: AppColors.textPrimary)), 
             backgroundColor: AppColors.backgroundCard,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: AppColors.glassBorder)),
@@ -203,7 +205,7 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
     if (!mounted) return;
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => const SuccessScreen()),
+      SlideUpFadeRoute(page: const SuccessScreen()),
     );
   }
 
@@ -246,7 +248,7 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
             if (Navigator.canPop(context)) {
               Navigator.pop(context);
             } else {
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const MainShell()));
+              Navigator.pushReplacement(context, SlideUpFadeRoute(page: const MainShell()));
             }
           }
         },
@@ -272,14 +274,14 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
                         if (Navigator.canPop(context)) {
                           Navigator.pop(context);
                         } else {
-                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const MainShell()));
+                          Navigator.pushReplacement(context, SlideUpFadeRoute(page: const MainShell()));
                         }
                       }
                     },
                   ),
           ),
           body: !_isDraftLoaded 
-              ? const Center(child: CircularProgressIndicator(color: AppColors.brandCoral))
+              ? const _FormSkeleton()
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -382,7 +384,7 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
     if (error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(error, style: const TextStyle(color: Colors.white)),
+          content: Text(error, style: AppTextStyles.body.copyWith(color: AppColors.textPrimary)),
           backgroundColor: AppColors.backgroundCard,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: AppColors.glassBorder)),
@@ -391,5 +393,49 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
     } else {
       _nextStep();
     }
+  }
+}
+
+class _FormSkeleton extends StatelessWidget {
+  const _FormSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.all(AppSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: AppSpacing.md),
+          DarkShimmer(width: double.infinity, height: 4),
+          SizedBox(height: AppSpacing.xl),
+          DarkShimmer(width: 80, height: 12),
+          SizedBox(height: AppSpacing.sm),
+          DarkShimmer(width: double.infinity, height: 52, borderRadius: AppRadius.md),
+          SizedBox(height: AppSpacing.xl),
+          DarkShimmer(width: 90, height: 12),
+          SizedBox(height: AppSpacing.sm),
+          DarkShimmer(width: double.infinity, height: 52, borderRadius: AppRadius.md),
+          SizedBox(height: AppSpacing.xl),
+          DarkShimmer(width: 70, height: 12),
+          SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              Expanded(child: DarkShimmer(width: double.infinity, height: 76, borderRadius: AppRadius.md)),
+              SizedBox(width: AppSpacing.md),
+              Expanded(child: DarkShimmer(width: double.infinity, height: 76, borderRadius: AppRadius.md)),
+            ],
+          ),
+          SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              Expanded(child: DarkShimmer(width: double.infinity, height: 76, borderRadius: AppRadius.md)),
+              SizedBox(width: AppSpacing.md),
+              Expanded(child: DarkShimmer(width: double.infinity, height: 76, borderRadius: AppRadius.md)),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }

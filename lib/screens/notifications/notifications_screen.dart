@@ -5,6 +5,7 @@ import '../../core/constants/app_text_styles.dart';
 import '../../core/constants/app_spacing.dart';
 import '../../core/widgets/tap_scale.dart';
 import '../../core/widgets/gradient_button.dart';
+import '../../core/widgets/dark_shimmer.dart';
 import '../../core/utils/app_router.dart';
 import '../../providers/notification_provider.dart';
 import '../../models/notification_model.dart';
@@ -57,7 +58,14 @@ class NotificationsScreen extends ConsumerWidget {
             itemBuilder: (context, index) => _NotificationTile(notif: notifs[index]),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppColors.brandCoral)),
+        loading: () => ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.md),
+          itemCount: 5,
+          itemBuilder: (_, __) => const Padding(
+            padding: EdgeInsets.only(bottom: AppSpacing.md),
+            child: DarkShimmer(width: double.infinity, height: 80, borderRadius: AppRadius.lg),
+          ),
+        ),
         error: (e, _) => _ErrorState(onRetry: () => ref.invalidate(notificationsProvider)),
       ),
     );

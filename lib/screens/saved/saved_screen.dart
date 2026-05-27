@@ -7,6 +7,7 @@ import '../../core/constants/app_text_styles.dart';
 import '../../core/constants/app_spacing.dart';
 import '../../core/widgets/staggered_list.dart';
 import '../../core/widgets/gradient_button.dart';
+import '../../core/widgets/dark_shimmer.dart';
 import '../home/widgets/event_card.dart';
 
 // lib/screens/saved/saved_screen.dart
@@ -53,8 +54,13 @@ class SavedScreen extends ConsumerWidget {
                   const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxl)),
                 ],
               ),
-        loading: () => const Center(
-          child: CircularProgressIndicator(color: AppColors.brandCoral),
+        loading: () => ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.md),
+          itemCount: 4,
+          itemBuilder: (_, __) => const Padding(
+            padding: EdgeInsets.only(bottom: AppSpacing.md),
+            child: DarkShimmer(width: double.infinity, height: 200, borderRadius: AppRadius.xl),
+          ),
         ),
         error: (e, _) => _ErrorState(
           onRetry: () => ref.invalidate(eventsProvider),

@@ -9,6 +9,9 @@ import '../../../../providers/app_config_provider.dart';
 import '../../../../core/widgets/gradient_button.dart';
 import '../../../../core/widgets/dark_shimmer.dart';
 
+// lib/screens/post_event/steps/step5_review.dart
+// Form step 5 — Evorra v3.1
+
 class Step5Review extends ConsumerWidget {
   final PostEventFormData formData;
   final VoidCallback onConfirm;
@@ -32,21 +35,21 @@ class Step5Review extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('EVENT PREVIEW', style: AppTextStyles.caption.copyWith(color: AppColors.brandCoral)),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.sm),
           
           // Custom Preview Card mimicking EventCard style
           _PreviewCard(formData: formData),
           
-          const SizedBox(height: 32),
+          const SizedBox(height: AppSpacing.xl),
           
           Text('SUMMARY', style: AppTextStyles.caption.copyWith(color: AppColors.brandCoral)),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           _SummaryTile(icon: Icons.location_on_rounded, label: 'Venue', value: formData.location),
           _SummaryTile(icon: Icons.local_activity_rounded, label: 'Type', value: formData.entryType == 'free' ? 'Free Entry' : 'Paid / Tickets'),
           _SummaryTile(icon: Icons.sell_rounded, label: 'Price', value: formData.entryType == 'free' ? 'Free' : formData.price),
           
           const Padding(
-            padding: EdgeInsets.symmetric(vertical: 24),
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
             child: Divider(color: AppColors.glassBorder),
           ),
           
@@ -57,7 +60,7 @@ class Step5Review extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('PUBLISHING FEE', style: AppTextStyles.caption.copyWith(color: AppColors.brandCoral)),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.sm),
                   
                   // Fee Box
                   Container(
@@ -74,7 +77,7 @@ class Step5Review extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(config.requiresPayment ? 'Standard Listing' : 'Promotional Offer', style: AppTextStyles.label.copyWith(color: Colors.white)),
-                            const SizedBox(height: 4),
+                            const SizedBox(height: AppSpacing.xs),
                             Text(
                               config.requiresPayment ? 'Secure payment via Razorpay' : 'List your event for free',
                               style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
@@ -92,7 +95,7 @@ class Step5Review extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpacing.lg),
                   
                   // Terms Bullets
                   _TermBullet(text: 'Your event will be live for ${config.eventDurationDays} days after approval.'),
@@ -106,14 +109,14 @@ class Step5Review extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('PUBLISHING FEE', style: AppTextStyles.caption.copyWith(color: AppColors.brandCoral)),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
                 const DarkShimmer(width: double.infinity, height: 80, borderRadius: AppRadius.lg),
               ],
             ),
             error: (_, __) => Text('Error loading platform config', style: AppTextStyles.body.copyWith(color: AppColors.error)),
           ),
           
-          const SizedBox(height: 48),
+          const SizedBox(height: AppSpacing.xxl),
           
           // Submit Button
           SizedBox(
@@ -126,7 +129,7 @@ class Step5Review extends ConsumerWidget {
             ),
           ),
           
-          const SizedBox(height: 48), // Bottom padding
+          const SizedBox(height: AppSpacing.xxl), // Bottom padding
         ],
       ),
     );
@@ -183,18 +186,18 @@ class _PreviewCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 Text(
                   formData.title.isEmpty ? 'Event Title' : formData.title,
                   style: AppTextStyles.heading2.copyWith(color: Colors.white),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 Row(
                   children: [
                     const Icon(Icons.location_on_rounded, size: 14, color: AppColors.textTertiary),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: AppSpacing.xs),
                     Expanded(
                       child: Text(
                         formData.location.isEmpty ? 'Venue Location' : formData.location,
@@ -224,11 +227,11 @@ class _SummaryTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
               color: AppColors.glassSurface,
               shape: BoxShape.circle,
@@ -236,13 +239,13 @@ class _SummaryTile extends StatelessWidget {
             ),
             child: Icon(icon, color: AppColors.brandCoral, size: 20),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(label, style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary)),
-                const SizedBox(height: 2),
+                const SizedBox(height: AppSpacing.xs),
                 Text(value.isEmpty ? 'Not set' : value, style: AppTextStyles.label.copyWith(color: Colors.white)),
               ],
             ),
@@ -262,7 +265,7 @@ class _TermBullet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -270,7 +273,7 @@ class _TermBullet extends StatelessWidget {
             padding: EdgeInsets.only(top: 2),
             child: Icon(Icons.check_circle_rounded, color: AppColors.brandCoral, size: 16),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
               text,

@@ -8,6 +8,9 @@ import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/widgets/tap_scale.dart';
 
+// lib/screens/post_event/steps/step3_media.dart
+// Form step 3 — Evorra v3.1
+
 class Step3Media extends StatelessWidget {
   final PostEventFormData formData;
   final VoidCallback onUpdate;
@@ -54,7 +57,7 @@ class Step3Media extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('COVER PHOTO (REQUIRED)', style: AppTextStyles.caption.copyWith(color: AppColors.brandCoral)),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           
           if (formData.images.isEmpty)
             TapScale(
@@ -72,16 +75,16 @@ class Step3Media extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(AppSpacing.md),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: AppColors.backgroundCard.withValues(alpha: 0.5),
                         ),
                         child: const Icon(Icons.add_a_photo_rounded, color: AppColors.brandCoral, size: 32),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.md),
                       Text('Add Cover Photo', style: AppTextStyles.label.copyWith(color: Colors.white)),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: AppSpacing.xs),
                       Text('16:9 ratio recommended', style: AppTextStyles.caption.copyWith(color: AppColors.textTertiary)),
                     ],
                   ),
@@ -116,10 +119,10 @@ class Step3Media extends StatelessWidget {
                       ),
                     ),
                     Positioned(
-                      bottom: 12,
-                      right: 12,
+                      bottom: AppSpacing.md,
+                      right: AppSpacing.md,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
                         decoration: BoxDecoration(
                           color: AppColors.glassSurface,
                           borderRadius: BorderRadius.circular(AppRadius.pill),
@@ -128,7 +131,7 @@ class Step3Media extends StatelessWidget {
                         child: Row(
                           children: [
                             const Icon(Icons.edit_rounded, color: Colors.white, size: 14),
-                            const SizedBox(width: 6),
+                            const SizedBox(width: AppSpacing.xs),
                             Text('Change Cover', style: AppTextStyles.caption.copyWith(color: Colors.white)),
                           ],
                         ),
@@ -139,7 +142,7 @@ class Step3Media extends StatelessWidget {
               ),
             ),
             
-          const SizedBox(height: 32),
+          const SizedBox(height: AppSpacing.xl),
           
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -148,11 +151,11 @@ class Step3Media extends StatelessWidget {
               Text('${formData.images.length > 1 ? formData.images.length - 1 : 0} / 4', style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.sm),
           
           Wrap(
-            spacing: 12,
-            runSpacing: 12,
+            spacing: AppSpacing.md,
+            runSpacing: AppSpacing.md,
             children: [
               if (formData.images.length > 1)
                 ...List.generate(formData.images.length - 1, (index) {
@@ -181,7 +184,7 @@ class Step3Media extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(height: 48),
+          const SizedBox(height: AppSpacing.xxl),
         ],
       ),
     );
@@ -216,7 +219,7 @@ class _GalleryThumbnail extends StatelessWidget {
           child: TapScale(
             onTap: onRemove,
             child: Container(
-              padding: const EdgeInsets.all(4),
+              padding: const EdgeInsets.all(AppSpacing.xs),
               decoration: const BoxDecoration(
                 color: AppColors.error,
                 shape: BoxShape.circle,

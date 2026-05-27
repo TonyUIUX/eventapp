@@ -13,6 +13,7 @@ import '../../models/event_model.dart';
 import '../../core/utils/date_utils.dart';
 import '../detail/event_detail_screen.dart';
 import 'edit_profile_screen.dart';
+import '../../core/widgets/dark_shimmer.dart';
 
 // lib/screens/profile/profile_screen.dart
 // Dark glassmorphism Profile Screen — Evorra v3.1
@@ -48,7 +49,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with SingleTicker
         body: ref.watch(currentUserProfileProvider).when(
           data: (user) {
             if (user == null) {
-              return const Center(child: Text('User profile not found.'));
+              return const Center(child: Text('User profile not found.', style: AppTextStyles.body));
             }
             return RefreshIndicator(
               color: AppColors.brandCoral,
@@ -180,7 +181,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with SingleTicker
 
                           // Edit Profile Button
                           TapScale(
-                            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EditProfileScreen())),
+                            onTap: () => Navigator.push(context, SlideUpFadeRoute(page: const EditProfileScreen())),
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl, vertical: 12),
                               decoration: BoxDecoration(
@@ -253,8 +254,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with SingleTicker
               ),
             );
           },
-          loading: () => const Center(child: CircularProgressIndicator(color: AppColors.brandCoral)),
-          error: (e, _) => Center(child: Text('Error loading profile: $e', style: AppTextStyles.body.copyWith(color: AppColors.error))),
+          loading: () => const _ProfileSkeleton(),
+          error: (e, _) => Center(
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.xxl),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('😵', style: TextStyle(fontSize: 52)),
+                  const SizedBox(height: AppSpacing.lg),
+                  const Text('Profile Error', style: AppTextStyles.heading2),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    'We couldn\'t load your profile.\nCheck your connection and try again.',
+                    style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -377,7 +396,15 @@ class _EventsList extends ConsumerWidget {
           },
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.brandCoral)),
+      loading: () => ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+        itemCount: 3,
+        physics: const NeverScrollableScrollPhysics(),
+        itemBuilder: (_, __) => const Padding(
+          padding: EdgeInsets.only(bottom: AppSpacing.md),
+          child: DarkShimmer(width: double.infinity, height: 80, borderRadius: AppRadius.md),
+        ),
+      ),
       error: (_, __) => const SizedBox.shrink(),
     );
   }
@@ -467,6 +494,56 @@ class _MiniEventCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ProfileSkeleton extends StatelessWidget {
+  const _ProfileSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const SizedBox(height: AppSpacing.xxl),
+          // Circle Avatar Shimmer
+          const DarkShimmer(width: 88, height: 88, borderRadius: 44),
+          const SizedBox(height: AppSpacing.md),
+          // Name Shimmer
+          const DarkShimmer(width: 140, height: 20),
+          const SizedBox(height: AppSpacing.sm),
+          // Bio Shimmer
+          const DarkShimmer(width: 200, height: 14),
+          const SizedBox(height: AppSpacing.xl),
+          // Stats Row Shimmer
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              DarkShimmer(width: 60, height: 40),
+              SizedBox(width: AppSpacing.xl),
+              DarkShimmer(width: 60, height: 40),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          // Tab bar Shimmer
+          const DarkShimmer(width: double.infinity, height: 48),
+          const SizedBox(height: AppSpacing.md),
+          // List item shimmers
+          Expanded(
+            child: ListView.builder(
+              itemCount: 3,
+              physics: const NeverScrollableScrollPhysics(),
+              itemBuilder: (_, __) => const Padding(
+                padding: EdgeInsets.only(bottom: AppSpacing.md),
+                child: DarkShimmer(width: double.infinity, height: 80, borderRadius: AppRadius.md),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

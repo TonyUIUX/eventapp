@@ -16,6 +16,7 @@ import '../../core/utils/date_utils.dart';
 import '../../core/utils/url_utils.dart';
 import '../../core/widgets/tap_scale.dart';
 import '../../core/widgets/gradient_button.dart';
+import '../../core/utils/app_router.dart';
 
 // lib/screens/detail/event_detail_screen.dart
 // Dark glassmorphism detail screen — Evorra v3.1
@@ -121,18 +122,18 @@ class EventDetailScreen extends ConsumerWidget {
                       ],
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.md),
 
                   // Title
                   Text(
                     event.title,
                     style: AppTextStyles.heading1.copyWith(color: Colors.white, height: 1.2),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.md),
 
                   // Organizer Row
                   _OrganizerRow(event: event),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppSpacing.lg),
 
                   // Date & Location Chips
                   Row(
@@ -168,7 +169,7 @@ class EventDetailScreen extends ConsumerWidget {
 
                   // Booking CTA
                   if (event.ticketLink != null || event.registrationLink != null) ...[
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.lg),
                     _BookingCTA(event: event),
                   ],
 
@@ -180,7 +181,7 @@ class EventDetailScreen extends ConsumerWidget {
 
                   // About Section
                   Text('About', style: AppTextStyles.label.copyWith(color: AppColors.textSecondary)),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
                     event.description,
                     style: AppTextStyles.body.copyWith(color: Colors.white, height: 1.6),
@@ -188,7 +189,7 @@ class EventDetailScreen extends ConsumerWidget {
 
                   // Tags
                   if (event.tags.isNotEmpty) ...[
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.md),
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
@@ -281,7 +282,7 @@ class _GlassHeaderOverflow extends StatelessWidget {
           onSelected: (value) {
             if (value == 'report') {
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: const Text('Report submitted.', style: TextStyle(color: Colors.white)),
+                content: Text('Report submitted.', style: AppTextStyles.body.copyWith(color: AppColors.textPrimary)),
                 backgroundColor: AppColors.backgroundCard,
                 behavior: SnackBarBehavior.floating,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: AppColors.glassBorder)),
@@ -570,7 +571,7 @@ class _MoreFromOrganizer extends ConsumerWidget {
                   final e = organizerEvents[index];
                   return TapScale(
                     onTap: () {
-                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => EventDetailScreen(event: e)));
+                      Navigator.pushReplacement(context, SlideUpFadeRoute(page: EventDetailScreen(event: e)));
                     },
                     child: Container(
                       width: 240,
@@ -656,7 +657,7 @@ class _StickyBottomBar extends ConsumerWidget {
                   SnackBar(
                     content: Text(
                       isSaved ? 'Event removed from saved' : 'Event saved successfully', 
-                      style: const TextStyle(color: Colors.white),
+                      style: AppTextStyles.body.copyWith(color: AppColors.textPrimary),
                     ),
                     backgroundColor: AppColors.backgroundCard,
                     behavior: SnackBarBehavior.floating,

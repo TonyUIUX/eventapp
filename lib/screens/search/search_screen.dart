@@ -9,6 +9,7 @@ import '../../core/constants/app_spacing.dart';
 import '../../core/widgets/staggered_list.dart';
 import '../../core/widgets/tap_scale.dart';
 import '../../core/widgets/gradient_button.dart';
+import '../../core/widgets/dark_shimmer.dart';
 import '../home/widgets/event_card.dart';
 
 // lib/screens/search/search_screen.dart
@@ -100,9 +101,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ),
             child: Row(
               children: [
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSpacing.md),
                 const Icon(Icons.search_rounded, color: AppColors.textTertiary, size: 20),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: TextField(
                     controller: _controller,
@@ -124,7 +125,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       ref.read(searchQueryProvider.notifier).state = '';
                     },
                     child: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 12),
+                      padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
                       child: Icon(Icons.close_rounded, color: AppColors.textSecondary, size: 18),
                     ),
                   ),
@@ -176,8 +177,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   ],
                 );
               },
-              loading: () => const Center(
-                child: CircularProgressIndicator(color: AppColors.brandCoral),
+              loading: () => ListView.builder(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                itemCount: 4,
+                physics: const NeverScrollableScrollPhysics(),
+                itemBuilder: (_, __) => const Padding(
+                  padding: EdgeInsets.only(bottom: AppSpacing.md),
+                  child: EventCardSkeleton(),
+                ),
               ),
               error: (_, __) => Center(
                 child: Padding(
@@ -235,13 +242,13 @@ class _SearchPrompt extends StatelessWidget {
             Text('Recent Searches', style: AppTextStyles.heading3.copyWith(color: AppColors.textSecondary)),
             const SizedBox(height: AppSpacing.sm),
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
               children: recentSearches.map((search) {
                 return TapScale(
                   onTap: () => onCategoryTap(search),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
                     decoration: BoxDecoration(
                       color: AppColors.glassSurface,
                       borderRadius: BorderRadius.circular(AppRadius.md),
@@ -251,9 +258,9 @@ class _SearchPrompt extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         const Icon(Icons.history_rounded, size: 14, color: AppColors.textTertiary),
-                        const SizedBox(width: 6),
+                        const SizedBox(width: AppSpacing.xs),
                         Text(search, style: AppTextStyles.label),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: AppSpacing.sm),
                         GestureDetector(
                           onTap: () => onRemoveRecent(search),
                           child: const Icon(Icons.close_rounded, size: 14, color: AppColors.textTertiary),
@@ -274,8 +281,8 @@ class _SearchPrompt extends StatelessWidget {
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
+              crossAxisSpacing: AppSpacing.md,
+              mainAxisSpacing: AppSpacing.md,
               childAspectRatio: 2.5,
             ),
             itemCount: categories.length,
@@ -285,7 +292,7 @@ class _SearchPrompt extends StatelessWidget {
               return TapScale(
                 onTap: () => onCategoryTap(cat['label']!),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                   decoration: BoxDecoration(
                     gradient: gradient,
                     borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -300,7 +307,7 @@ class _SearchPrompt extends StatelessWidget {
                   child: Row(
                     children: [
                       Text(cat['emoji']!, style: const TextStyle(fontSize: 20)),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.sm),
                       Expanded(
                         child: Text(
                           cat['label']!,

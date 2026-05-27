@@ -3,6 +3,10 @@ import '../../../../models/post_event_form_data.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/widgets/tap_scale.dart';
+
+// lib/screens/post_event/steps/step2_details.dart
+// Form step 2 — Evorra v3.1
 
 class Step2Details extends StatelessWidget {
   final PostEventFormData formData;
@@ -19,7 +23,7 @@ class Step2Details extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('DESCRIPTION', style: AppTextStyles.caption.copyWith(color: AppColors.brandCoral)),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           _GlassTextField(
             initialValue: formData.description,
             hintText: 'Describe the vibe, the artists, or what to expect...',
@@ -27,26 +31,26 @@ class Step2Details extends StatelessWidget {
             onChanged: (v) { formData.description = v; onUpdate(); },
           ),
           
-          const SizedBox(height: 32),
+          const SizedBox(height: AppSpacing.xl),
           
           Text('VENUE LOCATION', style: AppTextStyles.caption.copyWith(color: AppColors.brandCoral)),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           _GlassTextField(
             initialValue: formData.location,
             hintText: 'e.g. Kashi Art Café, Fort Kochi',
             onChanged: (v) { formData.location = v; onUpdate(); },
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           _GlassTextField(
             initialValue: formData.mapLink,
             hintText: 'Google Maps Link (Optional)',
             onChanged: (v) { formData.mapLink = v; onUpdate(); },
           ),
           
-          const SizedBox(height: 32),
+          const SizedBox(height: AppSpacing.xl),
           
           Text('ENTRY TYPE', style: AppTextStyles.caption.copyWith(color: AppColors.brandCoral)),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           
           // Custom Toggle
           Container(
@@ -59,7 +63,7 @@ class Step2Details extends StatelessWidget {
             child: Row(
               children: [
                 Expanded(
-                  child: GestureDetector(
+                  child: TapScale(
                     onTap: () {
                       formData.entryType = 'free';
                       onUpdate();
@@ -81,7 +85,7 @@ class Step2Details extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  child: GestureDetector(
+                  child: TapScale(
                     onTap: () {
                       formData.entryType = 'paid';
                       onUpdate();
@@ -106,7 +110,7 @@ class Step2Details extends StatelessWidget {
             ),
           ),
           
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.lg),
           
           if (formData.entryType == 'paid') ...[
             _AccentGlassTextField(
@@ -114,7 +118,7 @@ class Step2Details extends StatelessWidget {
               hintText: 'Price Info (e.g. ₹499 onwards)',
               onChanged: (v) { formData.price = v; onUpdate(); },
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             _AccentGlassTextField(
               initialValue: formData.ticketLink,
               hintText: 'Ticket Link (e.g. BookMyShow)',
@@ -128,7 +132,7 @@ class Step2Details extends StatelessWidget {
             ),
           ],
           
-          const SizedBox(height: 48), // Bottom padding
+          const SizedBox(height: AppSpacing.xxl), // Bottom padding
         ],
       ),
     );
@@ -172,7 +176,7 @@ class _GlassTextField extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppRadius.md),
           borderSide: const BorderSide(color: AppColors.brandCoral),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.all(AppSpacing.md),
       ),
     );
   }
@@ -210,7 +214,7 @@ class _AccentGlassTextField extends StatelessWidget {
           hintText: hintText,
           hintStyle: AppTextStyles.body.copyWith(color: AppColors.textTertiary),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          contentPadding: const EdgeInsets.all(AppSpacing.md),
         ),
       ),
     );

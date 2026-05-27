@@ -7,6 +7,9 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_constants.dart' hide AppSpacing, AppRadius;
 import '../../../../core/widgets/tap_scale.dart';
 
+// lib/screens/post_event/steps/step1_basics.dart
+// Form step 1 — Evorra v3.1
+
 class Step1Basics extends StatelessWidget {
   final PostEventFormData formData;
   final VoidCallback onUpdate;
@@ -34,17 +37,17 @@ class Step1Basics extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('EVENT NAME', style: AppTextStyles.caption.copyWith(color: AppColors.brandCoral)),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           _GlassTextField(
             initialValue: formData.title,
             hintText: 'e.g. Sunday Soul Sante',
             onChanged: (v) { formData.title = v; onUpdate(); },
           ),
           
-          const SizedBox(height: 32),
+          const SizedBox(height: AppSpacing.xl),
           
           Text('DATE & TIME', style: AppTextStyles.caption.copyWith(color: AppColors.brandCoral)),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           TapScale(
             onTap: () async {
               final date = await showDatePicker(
@@ -89,7 +92,7 @@ class Step1Basics extends StatelessWidget {
               }
             },
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              padding: const EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
                 color: AppColors.glassSurface,
                 borderRadius: BorderRadius.circular(AppRadius.md),
@@ -111,17 +114,17 @@ class Step1Basics extends StatelessWidget {
             ),
           ),
           
-          const SizedBox(height: 32),
+          const SizedBox(height: AppSpacing.xl),
           
           Text('CATEGORY', style: AppTextStyles.caption.copyWith(color: AppColors.brandCoral)),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
+              crossAxisSpacing: AppSpacing.md,
+              mainAxisSpacing: AppSpacing.md,
               childAspectRatio: 2.5,
             ),
             itemCount: AppConstants.categories.length,
@@ -129,7 +132,6 @@ class Step1Basics extends StatelessWidget {
               final cat = AppConstants.categories[index];
               final isSelected = formData.category == cat;
               final String label = cat[0].toUpperCase() + cat.substring(1);
-              final gradient = AppColors.categoryGradients[cat] ?? AppColors.brandGradient;
 
               return TapScale(
                 onTap: () {
@@ -137,7 +139,7 @@ class Step1Basics extends StatelessWidget {
                   onUpdate();
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                   decoration: BoxDecoration(
                     color: isSelected ? AppColors.glassSurface : AppColors.backgroundCard,
                     borderRadius: BorderRadius.circular(AppRadius.md),
@@ -161,7 +163,7 @@ class Step1Basics extends StatelessWidget {
                         _categoryEmojis[cat] ?? '✨',
                         style: const TextStyle(fontSize: 18),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.sm),
                       Expanded(
                         child: Text(
                           label,
@@ -179,7 +181,7 @@ class Step1Basics extends StatelessWidget {
               );
             },
           ),
-          const SizedBox(height: 48), // Bottom padding
+          const SizedBox(height: AppSpacing.xxl), // Bottom padding
         ],
       ),
     );
@@ -221,7 +223,7 @@ class _GlassTextField extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppRadius.md),
           borderSide: const BorderSide(color: AppColors.brandCoral),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.all(AppSpacing.md),
       ),
     );
   }
