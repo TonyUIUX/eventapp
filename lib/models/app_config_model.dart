@@ -63,7 +63,7 @@ class AppConfigModel {
       promoBannerText: data['promoBannerText'] ?? '',
       promoBannerLink: data['promoBannerLink'],
       promoBannerColor: data['promoBannerColor'] ?? '#FF5247',
-      promoBannerCta: data['promoBannerCta'] ?? 'Learn More',
+      promoBannerCta: data['promoBannerCta'] ?? 'Post Now',
       maintenanceMode: data['maintenanceMode'] ?? false,
       maintenanceMessage: data['maintenanceMessage'] ?? 'We are currently under maintenance. Please check back later.',
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),

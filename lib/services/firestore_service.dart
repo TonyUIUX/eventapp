@@ -30,6 +30,25 @@ class FirestoreService {
         });
   }
 
+  // Stream of all events posted by a specific user (no status filter) — used for profile tabs
+  Stream<List<EventModel>> getUserEventsStream(String uid) {
+    return _db
+        .collection(FirestoreCollections.events)
+        .where('postedBy', isEqualTo: uid)
+        .snapshots()
+        .map((snapshot) {
+          final events = snapshot.docs
+              .map((doc) {
+                try { return EventModel.fromFirestore(doc); }
+                catch (_) { return null; }
+              })
+              .whereType<EventModel>()
+              .toList();
+          events.sort((a, b) => b.date.compareTo(a.date)); // newest first
+          return events;
+        });
+  }
+
   // One-time fetch — server first, falls back to cache automatically
   Future<List<EventModel>> getEvents() async {
     try {

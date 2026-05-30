@@ -53,10 +53,11 @@ class MaintenanceScreen extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Large wrench emoji
-                  const Text(
-                    '🔧',
-                    style: TextStyle(fontSize: 72),
+                  // Large wrench icon
+                  const Icon(
+                    Icons.build_rounded,
+                    size: 72,
+                    color: AppColors.textTertiary,
                   ),
                   const SizedBox(height: AppSpacing.xl),
 

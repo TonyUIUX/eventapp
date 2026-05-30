@@ -37,7 +37,7 @@ class PublicProfileScreen extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('👤', style: TextStyle(fontSize: 52)),
+                  const Icon(Icons.person_off_rounded, size: 52, color: AppColors.textTertiary),
                   const SizedBox(height: AppSpacing.lg),
                   const Text('User Not Found', style: AppTextStyles.heading2),
                   const SizedBox(height: AppSpacing.sm),
@@ -202,7 +202,7 @@ class PublicProfileScreen extends ConsumerWidget {
               child: Center(
                 child: Column(
                   children: [
-                    const Text('📋', style: TextStyle(fontSize: 52)),
+                    const Icon(Icons.event_note_rounded, size: 52, color: AppColors.textTertiary),
                     const SizedBox(height: AppSpacing.md),
                     const Text('No Active Events', style: AppTextStyles.heading2),
                     const SizedBox(height: AppSpacing.sm),

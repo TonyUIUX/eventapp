@@ -23,6 +23,28 @@ class PostEventFormData {
   
   // Local media for upload (not saved to draft for simplicity)
   List<Uint8List> images = [];
+  List<String> existingImageUrls = [];
+  String? eventIdToEdit;
+
+  void fromEventModel(dynamic event) {
+    eventIdToEdit = event.id;
+    title = event.title;
+    description = event.description;
+    category = event.category;
+    date = event.date;
+    location = event.location;
+    mapLink = event.mapLink;
+    entryType = event.price.toLowerCase() == 'free' ? 'free' : 'paid';
+    price = event.price;
+    ticketLink = event.ticketLink;
+    registrationLink = event.registrationLink;
+    organizer = event.organizer;
+    contactPhone = event.contactPhone;
+    contactInstagram = event.contactInstagram;
+    website = event.website;
+    tags = List<String>.from(event.tags);
+    existingImageUrls = List<String>.from(event.imageUrls);
+  }
 
   Map<String, dynamic> toMap() {
     return {

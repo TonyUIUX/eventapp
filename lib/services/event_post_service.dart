@@ -84,6 +84,21 @@ class EventPostService {
     });
   }
 
+  Future<void> updateEvent({
+    required String eventId,
+    required Map<String, dynamic> eventData,
+    required List<String> imageUrls,
+  }) async {
+    final data = {
+      ...eventData,
+      'imageUrl': imageUrls.isNotEmpty ? imageUrls.first : '',
+      'imageUrls': imageUrls,
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
+
+    await _db.collection('events').doc(eventId).update(data);
+  }
+
   Future<void> submitFreeEvent({
     required Map<String, dynamic> eventData,
     required int eventDurationDays,

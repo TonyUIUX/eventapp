@@ -31,13 +31,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   // Placeholder for recent searches
   final List<String> _recentSearches = ['Music Festival', 'Tech Meetup', 'Art'];
 
-  final List<Map<String, String>> _categories = [
-    {'cat': 'music', 'emoji': '🎵', 'label': 'Music'},
-    {'cat': 'comedy', 'emoji': '😂', 'label': 'Comedy'},
-    {'cat': 'tech', 'emoji': '💻', 'label': 'Tech'},
-    {'cat': 'fitness', 'emoji': '🏃', 'label': 'Fitness'},
-    {'cat': 'art', 'emoji': '🎨', 'label': 'Art'},
-    {'cat': 'food', 'emoji': '🍔', 'label': 'Food'},
+  final List<Map<String, dynamic>> _categories = [
+    {'cat': 'music', 'icon': Icons.music_note_rounded, 'label': 'Music'},
+    {'cat': 'comedy', 'icon': Icons.sentiment_very_satisfied_rounded, 'label': 'Comedy'},
+    {'cat': 'tech', 'icon': Icons.computer_rounded, 'label': 'Tech'},
+    {'cat': 'fitness', 'icon': Icons.directions_run_rounded, 'label': 'Fitness'},
+    {'cat': 'art', 'icon': Icons.palette_rounded, 'label': 'Art'},
+    {'cat': 'food', 'icon': Icons.restaurant_rounded, 'label': 'Food'},
   ];
 
   @override
@@ -199,7 +199,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text('😵', style: TextStyle(fontSize: 52)),
+                      const Icon(Icons.error_outline_rounded, size: 52, color: AppColors.textTertiary),
                       const SizedBox(height: AppSpacing.lg),
                       const Text('Search Unavailable', style: AppTextStyles.heading3),
                       const SizedBox(height: AppSpacing.sm),
@@ -226,7 +226,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 // ── Empty State Prompt ────────────────────────────────────────────────────────
 class _SearchPrompt extends StatelessWidget {
   final List<String> recentSearches;
-  final List<Map<String, String>> categories;
+  final List<Map<String, dynamic>> categories;
   final ValueChanged<String> onRemoveRecent;
   final ValueChanged<String> onCategoryTap;
 
@@ -301,23 +301,27 @@ class _SearchPrompt extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                   decoration: BoxDecoration(
-                    gradient: gradient,
+                    color: gradient.colors.first.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(AppRadius.lg),
+                    border: Border.all(
+                      color: gradient.colors.first.withValues(alpha: 0.5),
+                      width: 1.5,
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.2),
-                        blurRadius: 8,
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
                     ],
                   ),
                   child: Row(
                     children: [
-                      Text(cat['emoji']!, style: const TextStyle(fontSize: 20)),
+                      Icon(cat['icon'] as IconData, color: Colors.white, size: 20),
                       const SizedBox(width: AppSpacing.sm),
                       Expanded(
                         child: Text(
-                          cat['label']!,
+                          cat['label'] as String,
                           style: AppTextStyles.label.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.w700,
@@ -347,7 +351,7 @@ class _NoResults extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text('🔍', style: TextStyle(fontSize: 64)),
+          const Icon(Icons.search_off_rounded, size: 64, color: AppColors.textTertiary),
           const SizedBox(height: AppSpacing.lg),
           Text('No events for \'$query\'', style: AppTextStyles.heading3),
           const SizedBox(height: AppSpacing.xs),

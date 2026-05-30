@@ -261,7 +261,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with SingleTicker
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('😵', style: TextStyle(fontSize: 52)),
+                  const Icon(Icons.error_outline_rounded, size: 52, color: AppColors.textTertiary),
                   const SizedBox(height: AppSpacing.lg),
                   const Text('Profile Error', style: AppTextStyles.heading2),
                   const SizedBox(height: AppSpacing.sm),
@@ -348,17 +348,15 @@ class _EventsList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // For now, filtering the main events provider
-    final eventsAsync = ref.watch(eventsProvider);
+    // Use dedicated user events provider — includes all statuses (under_review, expired, active)
+    final eventsAsync = ref.watch(userEventsProvider(uid));
 
     return eventsAsync.when(
       data: (allEvents) {
         final filtered = allEvents.where((e) {
-          // Adjust this logic if 'under_review' is considered isActive=false, etc.
-          // Fallback simple filter based on basic logic if status field is missing
-          if (isExpired) return e.postedBy == uid && e.status == 'expired';
-          if (status == 'active') return e.postedBy == uid && (e.status == 'active' || e.isActive);
-          return e.postedBy == uid && e.status == status;
+          if (isExpired) return e.status == 'expired';
+          if (status == 'active') return e.status == 'active' || e.isActive;
+          return e.status == status;
         }).toList();
 
         if (filtered.isEmpty) {
@@ -368,7 +366,7 @@ class _EventsList extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('📋', style: TextStyle(fontSize: 52)),
+                  const Icon(Icons.event_note_rounded, size: 52, color: AppColors.textTertiary),
                   const SizedBox(height: AppSpacing.md),
                   Text(
                     'No ${status == 'under_review' ? 'Pending' : status[0].toUpperCase() + status.substring(1)} Events',

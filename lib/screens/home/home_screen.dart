@@ -314,7 +314,7 @@ class _EmptyState extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('🎭', style: TextStyle(fontSize: 64)),
+            const Icon(Icons.event_busy_rounded, size: 64, color: AppColors.textTertiary),
             const SizedBox(height: AppSpacing.lg),
             const Text(
               'No Events Found',
@@ -349,8 +349,7 @@ class _ErrorState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.cloud_off_rounded,
-                size: 64, color: AppColors.textTertiary),
+            const Icon(Icons.cloud_off_rounded, size: 64, color: AppColors.textTertiary),
             const SizedBox(height: AppSpacing.lg),
             const Text('Connection Issue', style: AppTextStyles.heading2),
             const SizedBox(height: AppSpacing.sm),

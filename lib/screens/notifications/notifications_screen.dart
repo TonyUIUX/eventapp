@@ -195,7 +195,7 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('🔔', style: TextStyle(fontSize: 52)),
+            const Icon(Icons.notifications_none_rounded, size: 52, color: AppColors.textTertiary),
             const SizedBox(height: AppSpacing.xl),
             const Text('All Caught Up', style: AppTextStyles.heading2),
             const SizedBox(height: AppSpacing.sm),
@@ -223,7 +223,7 @@ class _ErrorState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('😵', style: TextStyle(fontSize: 52)),
+            const Icon(Icons.error_outline_rounded, size: 52, color: AppColors.textTertiary),
             const SizedBox(height: AppSpacing.lg),
             const Text('Connection Issue', style: AppTextStyles.heading2),
             const SizedBox(height: AppSpacing.sm),

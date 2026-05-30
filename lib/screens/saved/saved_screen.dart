@@ -81,7 +81,7 @@ class _EmptySaved extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('🔖', style: TextStyle(fontSize: 52)),
+            const Icon(Icons.bookmark_border_rounded, size: 52, color: AppColors.textTertiary),
             const SizedBox(height: AppSpacing.lg),
             const Text(
               'Nothing Saved Yet',
@@ -113,7 +113,7 @@ class _ErrorState extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('😵', style: TextStyle(fontSize: 52)),
+            const Icon(Icons.error_outline_rounded, size: 52, color: AppColors.textTertiary),
             const SizedBox(height: AppSpacing.lg),
             const Text('Something Went Wrong', style: AppTextStyles.heading2),
             const SizedBox(height: AppSpacing.sm),

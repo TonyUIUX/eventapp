@@ -25,6 +25,9 @@ import 'services/smart_cache_service.dart';
 import 'providers/app_config_provider.dart';
 import 'providers/notification_provider.dart';
 
+// Global provider to allow any widget to switch tabs programmatically
+final selectedTabProvider = StateProvider<int>((ref) => 0);
+
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
@@ -215,12 +218,13 @@ class _MainShellState extends ConsumerState<MainShell> {
   }
 
   void _onTabTapped(int index) {
-    setState(() => _currentIndex = index);
+    ref.read(selectedTabProvider.notifier).state = index;
   }
 
   @override
   Widget build(BuildContext context) {
     final unreadCount = ref.watch(unreadNotificationsCountProvider);
+    final currentIndex = ref.watch(selectedTabProvider);
 
     return Scaffold(
       backgroundColor: AppColors.backgroundBase,
@@ -236,7 +240,7 @@ class _MainShellState extends ConsumerState<MainShell> {
               child: Padding(
                 padding: const EdgeInsets.only(bottom: _navBarHeight),
                 child: IndexedStack(
-                  index: _currentIndex,
+                  index: currentIndex,
                   children: _screens,
                 ),
               ),
@@ -249,7 +253,7 @@ class _MainShellState extends ConsumerState<MainShell> {
             right: 0,
             bottom: 0,
             child: AppBottomNav(
-              currentIndex: _currentIndex,
+              currentIndex: currentIndex,
               onTap: _onTabTapped,
               notificationCount: unreadCount,
             ),

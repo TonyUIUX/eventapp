@@ -33,12 +33,12 @@ class CategoryFilterBar extends ConsumerWidget {
           return Padding(
             padding: const EdgeInsets.only(right: AppSpacing.sm),
             child: _CategoryChip(
-              label: cat['label']!,
-              emoji: cat['emoji']!,
+              label: cat['label'] as String,
+              icon: cat['icon'] as IconData,
               isSelected: isSelected,
               onTap: () {
-                ref.read(selectedCategoryProvider.notifier).state = cat['value']!;
-                AnalyticsService.instance.logCategoryFilter(cat['value']!);
+                ref.read(selectedCategoryProvider.notifier).state = cat['value'] as String;
+                AnalyticsService.instance.logCategoryFilter(cat['value'] as String);
               },
             ),
           );
@@ -48,15 +48,16 @@ class CategoryFilterBar extends ConsumerWidget {
   }
 }
 
+ // ── Filter Chip Widget ───────────────────────────────────────────────────────
 class _CategoryChip extends StatelessWidget {
   final String label;
-  final String emoji;
+  final IconData icon;
   final bool isSelected;
   final VoidCallback onTap;
 
   const _CategoryChip({
     required this.label,
-    required this.emoji,
+    required this.icon,
     required this.isSelected,
     required this.onTap,
   });
@@ -90,7 +91,11 @@ class _CategoryChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(emoji, style: const TextStyle(fontSize: 14)),
+            Icon(
+              icon, 
+              size: 16, 
+              color: isSelected ? Colors.white : AppColors.textSecondary,
+            ),
             const SizedBox(width: AppSpacing.sm),
             Text(
               label,

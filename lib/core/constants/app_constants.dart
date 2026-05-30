@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class AppSpacing {
   static const double zero = 0.0;
   static const double quat = 2.0;
@@ -21,14 +23,14 @@ class AppRadius {
 }
 
 class AppCategories {
-  static const List<Map<String, String>> all = [
-    {'label': 'All', 'value': 'all', 'emoji': '✨'},
-    {'label': 'Comedy', 'value': 'comedy', 'emoji': '😂'},
-    {'label': 'Music', 'value': 'music', 'emoji': '🎵'},
-    {'label': 'Tech', 'value': 'tech', 'emoji': '💻'},
-    {'label': 'Fitness', 'value': 'fitness', 'emoji': '🏃'},
-    {'label': 'Art', 'value': 'art', 'emoji': '🎨'},
-    {'label': 'Workshop', 'value': 'workshop', 'emoji': '🛠️'},
+  static const List<Map<String, dynamic>> all = [
+    {'label': 'All', 'value': 'all', 'icon': Icons.apps_rounded},
+    {'label': 'Comedy', 'value': 'comedy', 'icon': Icons.sentiment_very_satisfied_rounded},
+    {'label': 'Music', 'value': 'music', 'icon': Icons.music_note_rounded},
+    {'label': 'Tech', 'value': 'tech', 'icon': Icons.computer_rounded},
+    {'label': 'Fitness', 'value': 'fitness', 'icon': Icons.directions_run_rounded},
+    {'label': 'Art', 'value': 'art', 'icon': Icons.palette_rounded},
+    {'label': 'Workshop', 'value': 'workshop', 'icon': Icons.handyman_rounded},
   ];
 }
 

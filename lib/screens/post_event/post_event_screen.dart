@@ -25,8 +25,12 @@ import 'steps/step5_review.dart';
 // lib/screens/post_event/post_event_screen.dart
 // Dark glassmorphism post event shell
 
+import '../../models/event_model.dart'; // Added import for EventModel
+
 class PostEventScreen extends ConsumerStatefulWidget {
-  const PostEventScreen({super.key});
+  final EventModel? eventToEdit;
+  
+  const PostEventScreen({super.key, this.eventToEdit});
 
   @override
   ConsumerState<PostEventScreen> createState() => _PostEventScreenState();
@@ -50,7 +54,12 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
   @override
   void initState() {
     super.initState();
-    _initDraft();
+    if (widget.eventToEdit != null) {
+      _formData.fromEventModel(widget.eventToEdit!);
+      _isDraftLoaded = true;
+    } else {
+      _initDraft();
+    }
   }
 
   Future<void> _initDraft() async {
@@ -131,7 +140,7 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
     
     try {
       // 1. Upload images first
-      List<String> imageUrls = [];
+      List<String> imageUrls = List<String>.from(_formData.existingImageUrls);
       for (var i = 0; i < _formData.images.length; i++) {
         final url = await StorageService().uploadEventImage(
           _formData.images[i],
@@ -139,6 +148,17 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
           'img_$i.jpg',
         );
         imageUrls.add(url);
+      }
+
+      if (_formData.eventIdToEdit != null) {
+        // Edit flow
+        await EventPostService.instance.updateEvent(
+          eventId: _formData.eventIdToEdit!,
+          eventData: _formData.toMap(),
+          imageUrls: imageUrls,
+        );
+        await _onSuccess();
+        return;
       }
 
       if (config.requiresPayment && config.paymentEnabled) {

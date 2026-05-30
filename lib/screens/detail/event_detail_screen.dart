@@ -17,6 +17,7 @@ import '../../core/utils/url_utils.dart';
 import '../../core/widgets/tap_scale.dart';
 import '../../core/widgets/gradient_button.dart';
 import '../../core/utils/app_router.dart';
+import '../post_event/post_event_screen.dart';
 
 // lib/screens/detail/event_detail_screen.dart
 // Dark glassmorphism detail screen — Evorra v3.1
@@ -62,7 +63,10 @@ class EventDetailScreen extends ConsumerWidget {
                 _GlassHeaderAction(
                   icon: Icons.edit_rounded,
                   onTap: () {
-                    // Navigate to Edit
+                    Navigator.push(
+                      context,
+                      SlideUpFadeRoute(page: PostEventScreen(eventToEdit: event)),
+                    );
                   },
                 ),
               const SizedBox(width: 8),

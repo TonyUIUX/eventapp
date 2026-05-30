@@ -6,6 +6,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../providers/app_config_provider.dart';
 import '../../../core/utils/url_utils.dart';
 import '../../../core/widgets/tap_scale.dart';
+import '../../../main.dart';
 
 // lib/screens/home/widgets/promo_banner.dart
 // Dark glassmorphism promo banner — Evorra v3.1
@@ -75,10 +76,17 @@ class _PromoBannerState extends ConsumerState<PromoBanner> {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    if (config.promoBannerCta.isNotEmpty && config.promoBannerLink != null) ...[
+                    if (config.promoBannerCta.isNotEmpty) ...[ 
                       const SizedBox(height: AppSpacing.xs),
                       TapScale(
-                        onTap: () => AppUrlUtils.openUrl(config.promoBannerLink!, context),
+                        onTap: () {
+                          if (config.promoBannerLink != null && config.promoBannerLink!.isNotEmpty) {
+                            AppUrlUtils.openUrl(config.promoBannerLink!, context);
+                          } else {
+                            // No link — navigate to Post Event tab (index 2)
+                            ref.read(selectedTabProvider.notifier).state = 2;
+                          }
+                        },
                         child: Text(
                           config.promoBannerCta,
                           style: AppTextStyles.caption.copyWith(color: Colors.white, fontWeight: FontWeight.bold, decoration: TextDecoration.underline),

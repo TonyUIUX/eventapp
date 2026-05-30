@@ -14,6 +14,12 @@ final eventsProvider = StreamProvider<List<EventModel>>((ref) {
   return service.getEventsStream();
 });
 
+// Real-time stream of ALL events for a specific user (includes under_review, expired, etc.)
+final userEventsProvider = StreamProvider.family<List<EventModel>, String>((ref, uid) {
+  final service = ref.read(firestoreServiceProvider);
+  return service.getUserEventsStream(uid);
+});
+
 // ─── Filter state ─────────────────────────────────────────────────────────
 // Currently selected category chip — default 'all'
 final selectedCategoryProvider = StateProvider<String>((ref) => 'all');

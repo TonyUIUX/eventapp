@@ -66,11 +66,35 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
       if (cred != null && mounted) {
         Navigator.pop(context);
       }
+    } on FirebaseAuthException catch (e) {
+      final msg = switch (e.code) {
+        'popup-blocked'           => 'Popup was blocked. Please allow popups for this site.',
+        'cancelled-popup-request' => 'Sign-in was cancelled.',
+        'user-cancelled'          => 'Sign-in was cancelled.',
+        'network-request-failed'  => 'Network error. Check your internet connection.',
+        _                         => 'Google Sign-In failed (${e.code}). Please try again.',
+      };
+      _showError(msg);
     } catch (e) {
       _showError('Google Sign-In failed. Please try again.');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  void _showPhoneAuthSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _PhoneAuthSheet(
+        authService: ref.read(authServiceProvider),
+        onSuccess: () {
+          Navigator.pop(context); // close sheet
+          if (mounted) Navigator.pop(context); // close auth screen
+        },
+      ),
+    );
   }
 
   Future<void> _handleEmailAuth() async {
@@ -353,9 +377,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
 
                         // Phone Auth Link
                         TapScale(
-                          onTap: () {
-                            // Phone Auth Navigation
-                          },
+                          onTap: () => _showPhoneAuthSheet(context),
                           child: Text(
                             'Continue with Phone Number',
                             style: AppTextStyles.label.copyWith(color: AppColors.brandCoral),
@@ -428,7 +450,192 @@ class _GlassTextField extends StatelessWidget {
         errorStyle: AppTextStyles.caption.copyWith(color: AppColors.error),
         contentPadding: const EdgeInsets.symmetric(vertical: 16),
       ),
-      validator: validator,
+        validator: validator,
+    );
+  }
+}
+
+// ── Phone Auth Bottom Sheet ────────────────────────────────────────────────────
+
+class _PhoneAuthSheet extends StatefulWidget {
+  final dynamic authService;
+  final VoidCallback onSuccess;
+  const _PhoneAuthSheet({required this.authService, required this.onSuccess});
+
+  @override
+  State<_PhoneAuthSheet> createState() => _PhoneAuthSheetState();
+}
+
+class _PhoneAuthSheetState extends State<_PhoneAuthSheet> {
+  final _phoneController = TextEditingController();
+  final _otpController = TextEditingController();
+  bool _otpSent = false;
+  bool _isLoading = false;
+  String? _verificationId;
+  String? _error;
+
+  @override
+  void dispose() {
+    _phoneController.dispose();
+    _otpController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _sendOtp() async {
+    final phone = _phoneController.text.trim();
+    if (phone.length < 10) {
+      setState(() => _error = 'Enter a valid phone number with country code (e.g. +91XXXXXXXXXX)');
+      return;
+    }
+    setState(() { _isLoading = true; _error = null; });
+    try {
+      await widget.authService.verifyPhone(
+        phoneNumber: phone,
+        onCodeSent: (String verificationId) {
+          if (mounted) setState(() { _verificationId = verificationId; _otpSent = true; _isLoading = false; });
+        },
+        onFailed: (e) {
+          if (mounted) setState(() { _error = 'Failed to send OTP: ${e.message}'; _isLoading = false; });
+        },
+      );
+    } catch (e) {
+      if (mounted) setState(() { _error = 'An error occurred. Try again.'; _isLoading = false; });
+    }
+  }
+
+  Future<void> _verifyOtp() async {
+    if (_verificationId == null) return;
+    final otp = _otpController.text.trim();
+    if (otp.length != 6) {
+      setState(() => _error = 'Enter the 6-digit OTP');
+      return;
+    }
+    setState(() { _isLoading = true; _error = null; });
+    try {
+      await widget.authService.signInWithOTP(
+        verificationId: _verificationId!,
+        smsCode: otp,
+      );
+      widget.onSuccess();
+    } on FirebaseAuthException catch (e) {
+      if (mounted) setState(() { _error = e.code == 'invalid-verification-code' ? 'Invalid OTP. Please try again.' : 'Verification failed. Try again.'; _isLoading = false; });
+    } catch (e) {
+      if (mounted) setState(() { _error = 'Verification failed. Try again.'; _isLoading = false; });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        decoration: const BoxDecoration(
+          color: AppColors.backgroundSheet,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+          border: Border(top: BorderSide(color: AppColors.glassBorder)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Handle bar
+            Center(
+              child: Container(
+                width: 40, height: 4,
+                decoration: BoxDecoration(color: AppColors.glassBorder, borderRadius: BorderRadius.circular(2)),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              _otpSent ? 'Enter OTP' : 'Phone Sign-In',
+              style: AppTextStyles.heading2.copyWith(color: Colors.white),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              _otpSent
+                  ? 'Enter the 6-digit code sent to ${_phoneController.text.trim()}'
+                  : 'We\'ll send a one-time code to verify your number.',
+              style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            if (_error != null) ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.error.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
+                  border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 16),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text(_error!, style: AppTextStyles.caption.copyWith(color: AppColors.error))),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+            ],
+            if (!_otpSent)
+              TextFormField(
+                controller: _phoneController,
+                keyboardType: TextInputType.phone,
+                style: AppTextStyles.body.copyWith(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: '+91 98765 43210',
+                  hintStyle: AppTextStyles.body.copyWith(color: AppColors.textTertiary),
+                  prefixIcon: const Icon(Icons.phone_outlined, color: AppColors.textTertiary, size: 20),
+                  filled: true,
+                  fillColor: AppColors.glassSurface,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md), borderSide: BorderSide.none),
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md), borderSide: BorderSide.none),
+                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md), borderSide: const BorderSide(color: AppColors.glassBorder)),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+              )
+            else
+              TextFormField(
+                controller: _otpController,
+                keyboardType: TextInputType.number,
+                maxLength: 6,
+                style: AppTextStyles.heading2.copyWith(color: Colors.white, letterSpacing: 8),
+                textAlign: TextAlign.center,
+                decoration: InputDecoration(
+                  hintText: '------',
+                  hintStyle: AppTextStyles.heading2.copyWith(color: AppColors.textTertiary, letterSpacing: 8),
+                  counterText: '',
+                  filled: true,
+                  fillColor: AppColors.glassSurface,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md), borderSide: BorderSide.none),
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md), borderSide: BorderSide.none),
+                  focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md), borderSide: const BorderSide(color: AppColors.brandCoral)),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+              ),
+            const SizedBox(height: AppSpacing.lg),
+            SizedBox(
+              width: double.infinity,
+              child: GradientButton(
+                label: _otpSent ? 'Verify OTP' : 'Send OTP',
+                isLoading: _isLoading,
+                height: 56,
+                onTap: _isLoading ? () {} : (_otpSent ? _verifyOtp : _sendOtp),
+              ),
+            ),
+            if (_otpSent) ...[
+              const SizedBox(height: AppSpacing.md),
+              Center(
+                child: TextButton(
+                  onPressed: _isLoading ? null : () => setState(() { _otpSent = false; _error = null; _otpController.clear(); }),
+                  child: Text('Change number', style: AppTextStyles.label.copyWith(color: AppColors.textSecondary)),
+                ),
+              ),
+            ],
+            const SizedBox(height: AppSpacing.md),
+          ],
+        ),
+      ),
     );
   }
 }
