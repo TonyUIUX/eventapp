@@ -189,7 +189,6 @@ class MainShell extends ConsumerStatefulWidget {
 }
 
 class _MainShellState extends ConsumerState<MainShell> {
-  int _currentIndex = 0;
 
   // Height of the floating nav bar including bottom padding.
   // Body uses this as bottom padding so content is never hidden.

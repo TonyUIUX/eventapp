@@ -60,22 +60,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with SingleTicker
               child: CustomScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
-                  // ── App Bar with Sign Out ───────────────────────────────
-                  SliverAppBar(
-                    backgroundColor: AppColors.backgroundBase,
-                    elevation: 0,
-                    scrolledUnderElevation: 0,
-                    pinned: true,
-                    actions: [
-                      IconButton(
-                        onPressed: () => _showSignOutDialog(context, ref),
-                        icon: const Icon(Icons.logout_rounded, color: AppColors.textSecondary),
-                        tooltip: 'Sign Out',
-                      ),
-                      const SizedBox(width: AppSpacing.sm),
-                    ],
-                  ),
-
                   // ── Header Section ────────────────────────────────────────
                   SliverToBoxAdapter(
                     child: Container(
@@ -90,57 +74,81 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with SingleTicker
                           ],
                         ),
                       ),
-                      child: Column(
-                        children: [
-                          const SizedBox(height: AppSpacing.md),
-                          // Profile Photo (StoryRingAvatar style)
-                          Stack(
-                            alignment: Alignment.bottomRight,
-                            children: [
-                              Container(
-                                width: 88,
-                                height: 88,
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  gradient: AppColors.brandGradient,
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(2.5),
-                                  child: Container(
-                                    decoration: const BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: AppColors.backgroundBase,
-                                    ),
-                                    child: ClipOval(
-                                      child: user.photoUrl != null
-                                          ? CachedNetworkImage(
-                                              imageUrl: user.photoUrl!,
-                                              fit: BoxFit.cover,
-                                              errorWidget: (_, __, ___) => const Icon(Icons.person_rounded, size: 40, color: AppColors.textTertiary),
-                                            )
-                                          : const Icon(Icons.person_rounded, size: 40, color: AppColors.textTertiary),
-                                    ),
+                      child: SafeArea(
+                        bottom: false,
+                        child: Stack(
+                          alignment: Alignment.topCenter,
+                          children: [
+                            // Sign Out Button Top Right
+                            Positioned(
+                              top: AppSpacing.md,
+                              right: AppSpacing.md,
+                              child: TapScale(
+                                onTap: () => _showSignOutDialog(context, ref),
+                                child: Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.glassSurface,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: AppColors.glassBorder),
                                   ),
+                                  child: const Icon(Icons.logout_rounded, color: AppColors.textSecondary, size: 20),
                                 ),
                               ),
-                              // Edit Overlay Badge
-                              Container(
-                                padding: const EdgeInsets.all(6),
-                                decoration: BoxDecoration(
-                                  color: AppColors.glassSurface,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(color: AppColors.glassBorder),
+                            ),
+                            
+                            // Profile Content
+                            Column(
+                              children: [
+                                const SizedBox(height: AppSpacing.xxl),
+                                // Profile Photo (StoryRingAvatar style)
+                                Stack(
+                                  alignment: Alignment.bottomRight,
+                                  children: [
+                                    Container(
+                                      width: 88,
+                                      height: 88,
+                                      decoration: const BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        gradient: AppColors.brandGradient,
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(2.5),
+                                        child: Container(
+                                          decoration: const BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: AppColors.backgroundBase,
+                                          ),
+                                          child: ClipOval(
+                                            child: user.photoUrl != null
+                                                ? CachedNetworkImage(
+                                                    imageUrl: user.photoUrl!,
+                                                    fit: BoxFit.cover,
+                                                    errorWidget: (_, __, ___) => const Icon(Icons.person_rounded, size: 40, color: AppColors.textTertiary),
+                                                  )
+                                                : const Icon(Icons.person_rounded, size: 40, color: AppColors.textTertiary),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    // Edit Overlay Badge
+                                    Container(
+                                      padding: const EdgeInsets.all(6),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.glassSurface,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(color: AppColors.glassBorder),
+                                      ),
+                                      child: const Icon(Icons.edit_rounded, size: 14, color: Colors.white),
+                                    ),
+                                  ],
                                 ),
-                                child: const Icon(Icons.edit_rounded, size: 14, color: Colors.white),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: AppSpacing.md),
+                                const SizedBox(height: AppSpacing.md),
 
-                          // Name
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
+                                // Name
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
                               Text(
                                 user.displayName.isEmpty ? 'Evorra User' : user.displayName,
                                 style: AppTextStyles.heading1.copyWith(color: Colors.white),
@@ -172,9 +180,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with SingleTicker
                             children: [
                               _StatPill(label: 'Events', value: user.totalEventsPosted.toString()),
                               const SizedBox(width: AppSpacing.sm),
-                              _StatPill(label: 'Views', value: user.totalViews.toString()),
+                              _StatPill(label: 'Followers', value: user.followersCount.toString()),
                               const SizedBox(width: AppSpacing.sm),
-                              const _StatPill(label: 'Following', value: '124'), // Placeholder
+                              _StatPill(label: 'Following', value: user.followingCount.toString()),
                             ],
                           ),
                           const SizedBox(height: AppSpacing.xl),
@@ -193,7 +201,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with SingleTicker
                             ),
                           ),
                           const SizedBox(height: AppSpacing.xxl),
-                        ],
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),

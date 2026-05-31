@@ -13,6 +13,8 @@ class UserModel {
   final bool isAdmin;
   final int totalEventsPosted;
   final int totalViews;
+  final int followersCount;
+  final int followingCount;
   final DateTime createdAt;
 
   const UserModel({
@@ -28,6 +30,8 @@ class UserModel {
     this.isAdmin = false,
     this.totalEventsPosted = 0,
     this.totalViews = 0,
+    this.followersCount = 0,
+    this.followingCount = 0,
     required this.createdAt,
   });
 
@@ -46,6 +50,8 @@ class UserModel {
       isAdmin: data['isAdmin'] ?? false,
       totalEventsPosted: data['totalEventsPosted'] ?? 0,
       totalViews: data['totalViews'] ?? 0,
+      followersCount: data['followersCount'] ?? 0,
+      followingCount: data['followingCount'] ?? 0,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
@@ -63,6 +69,8 @@ class UserModel {
       'isAdmin': isAdmin,
       'totalEventsPosted': totalEventsPosted,
       'totalViews': totalViews,
+      'followersCount': followersCount,
+      'followingCount': followingCount,
       'createdAt': Timestamp.fromDate(createdAt),
     };
   }

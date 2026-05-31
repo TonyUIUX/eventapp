@@ -149,14 +149,27 @@ class PublicProfileScreen extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                if (user.instagramHandle != null)
-                  _SocialChip(icon: Icons.camera_alt_rounded, label: user.instagramHandle!),
-                if (user.website != null) ...[
-                  const SizedBox(width: AppSpacing.sm),
-                  const _SocialChip(icon: Icons.language_rounded, label: 'Website'),
-                ],
+                _StatPill(label: 'Events', value: user.totalEventsPosted.toString()),
+                const SizedBox(width: AppSpacing.sm),
+                _StatPill(label: 'Followers', value: user.followersCount.toString()),
+                const SizedBox(width: AppSpacing.sm),
+                _StatPill(label: 'Following', value: user.followingCount.toString()),
               ],
             ),
+            if (user.instagramHandle != null || user.website != null) ...[
+              const SizedBox(height: AppSpacing.xl),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (user.instagramHandle != null)
+                    _SocialChip(icon: Icons.camera_alt_rounded, label: user.instagramHandle!),
+                  if (user.website != null) ...[
+                    const SizedBox(width: AppSpacing.sm),
+                    const _SocialChip(icon: Icons.language_rounded, label: 'Website'),
+                  ],
+                ],
+              ),
+            ],
           ],
         ),
       ),
@@ -251,6 +264,32 @@ class _SocialChip extends StatelessWidget {
           Icon(icon, size: 16, color: AppColors.textPrimary),
           const SizedBox(width: AppSpacing.sm),
           Text(label, style: AppTextStyles.label),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatPill extends StatelessWidget {
+  final String label;
+  final String value;
+  const _StatPill({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppColors.glassSurface,
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+        border: Border.all(color: AppColors.glassBorder),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(value, style: AppTextStyles.heading3.copyWith(color: Colors.white)),
+          const SizedBox(width: 6),
+          Text(label, style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
         ],
       ),
     );
