@@ -11,6 +11,7 @@ class UserModel {
   final String? website;
   final bool isVerifiedOrg;
   final bool isAdmin;
+  final String role; // 'user' | 'superadmin'
   final int totalEventsPosted;
   final int totalViews;
   final int followersCount;
@@ -28,6 +29,7 @@ class UserModel {
     this.website,
     this.isVerifiedOrg = false,
     this.isAdmin = false,
+    this.role = 'user',
     this.totalEventsPosted = 0,
     this.totalViews = 0,
     this.followersCount = 0,
@@ -48,6 +50,7 @@ class UserModel {
       website: data['website'],
       isVerifiedOrg: data['isVerifiedOrg'] ?? false,
       isAdmin: data['isAdmin'] ?? false,
+      role: data['role'] ?? 'user',
       totalEventsPosted: data['totalEventsPosted'] ?? 0,
       totalViews: data['totalViews'] ?? 0,
       followersCount: data['followersCount'] ?? 0,
@@ -55,6 +58,10 @@ class UserModel {
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
+
+  /// Returns true only when the Firestore `role` field is 'superadmin'.
+  /// Never checks email or UID — Firestore is the single source of truth.
+  bool get isSuperAdmin => role == 'superadmin';
 
   Map<String, dynamic> toMap() {
     return {
@@ -67,6 +74,7 @@ class UserModel {
       'website': website,
       'isVerifiedOrg': isVerifiedOrg,
       'isAdmin': isAdmin,
+      'role': role,
       'totalEventsPosted': totalEventsPosted,
       'totalViews': totalViews,
       'followersCount': followersCount,

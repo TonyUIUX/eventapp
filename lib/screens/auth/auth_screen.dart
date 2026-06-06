@@ -158,20 +158,20 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
   }
 
   // ── Phone sheet ───────────────────────────────────────────────────────────
-  void _showPhoneAuthSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => _PhoneAuthSheet(
-        authService: ref.read(authServiceProvider),
-        onSuccess: () {
-          // Sheet pops itself — then pop auth screen.
-          if (mounted) Navigator.of(context).pop(true);
-        },
-      ),
-    );
-  }
+  // void _showPhoneAuthSheet() {
+  //   showModalBottomSheet(
+  //     context: context,
+  //     isScrollControlled: true,
+  //     backgroundColor: Colors.transparent,
+  //     builder: (_) => _PhoneAuthSheet(
+  //       authService: ref.read(authServiceProvider),
+  //       onSuccess: () {
+  //         // Sheet pops itself — then pop auth screen.
+  //         // if (mounted) Navigator.of(context).pop(true);
+  //       },
+  //     ),
+  //   );
+  // }
 
   // ── Build ─────────────────────────────────────────────────────────────────
   @override
@@ -481,16 +481,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
                           onTap: _isLoading ? () {} : _handleEmailAuth,
                         ),
 
-                        const SizedBox(height: AppSpacing.xl),
-
-                        TapScale(
-                          onTap: _isLoading ? null : _showPhoneAuthSheet,
-                          child: Text(
-                            'Continue with Phone Number',
-                            style: AppTextStyles.label
-                                .copyWith(color: AppColors.brandCoral),
-                          ),
-                        ),
+                        // Mobile sign-in button temporarily hidden
                       ],
                     ),
                   ),

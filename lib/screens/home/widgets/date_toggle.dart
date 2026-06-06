@@ -29,9 +29,9 @@ class DateToggle extends ConsumerWidget {
         ),
         child: Row(
           children: [
+            _ToggleOption(label: 'All', value: 'all', selected: selected),
             _ToggleOption(label: 'Today', value: 'today', selected: selected),
             _ToggleOption(label: 'Weekend', value: 'weekend', selected: selected),
-            _ToggleOption(label: 'Week', value: 'week', selected: selected),
           ],
         ),
       ),

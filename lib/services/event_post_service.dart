@@ -137,4 +137,56 @@ class EventPostService {
 
     await batch.commit();
   }
+
+  /// Superadmin-only: posts an event instantly as active.
+  /// Status = 'active', isActive = true, paymentStatus = 'free'.
+  /// Events last 1 year (365 days) by default.
+  Future<void> submitSuperAdminEvent({
+    required Map<String, dynamic> eventData,
+    required List<String> imageUrls,
+    int eventDurationDays = 365,
+  }) async {
+    final user = FirebaseAuth.instance.currentUser;
+    final now = DateTime.now();
+    final expiryDate = now.add(Duration(days: eventDurationDays));
+
+    final batch = _db.batch();
+    final eventRef = _db.collection('events').doc();
+
+    final data = {
+      ...eventData,
+      'postedBy': user?.uid,
+      'status': 'active',
+      'paymentStatus': 'free',
+      'imageUrl': imageUrls.isNotEmpty ? imageUrls.first : '',
+      'imageUrls': imageUrls,
+      'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
+      'expiresAt': Timestamp.fromDate(expiryDate),
+      'isActive': true,
+      'isFeatured': false,
+      'totalViews': 0,
+      'totalShares': 0,
+    };
+    batch.set(eventRef, data);
+
+    if (user != null) {
+      final userRef = _db.collection('users').doc(user.uid);
+      batch.update(userRef, {
+        'totalEventsPosted': FieldValue.increment(1),
+      });
+    }
+
+    await batch.commit();
+  }
+
+  /// Superadmin soft-delete: marks event as rejected and inactive.
+  Future<void> deleteEvent(String eventId) async {
+    await _db.collection('events').doc(eventId).update({
+      'isActive': false,
+      'status': 'rejected',
+      'adminNote': 'Removed by superadmin',
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
 }

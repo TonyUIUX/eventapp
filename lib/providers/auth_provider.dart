@@ -25,3 +25,10 @@ final currentUserProfileProvider = StreamProvider<UserModel?>((ref) {
       .snapshots()
       .map((doc) => doc.exists ? UserModel.fromFirestore(doc) : null);
 });
+
+/// Derived provider — true only when Firestore users/{uid}.role == 'superadmin'.
+/// No emails or UIDs are ever checked in Dart code.
+final isSuperAdminProvider = Provider<bool>((ref) {
+  final profile = ref.watch(currentUserProfileProvider);
+  return profile.valueOrNull?.isSuperAdmin ?? false;
+});

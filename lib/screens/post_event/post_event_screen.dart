@@ -6,6 +6,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
 import '../../core/constants/app_spacing.dart';
 import '../../models/post_event_form_data.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/app_config_provider.dart';
 import '../../services/event_post_service.dart';
 import '../../services/storage_service.dart';
@@ -132,12 +133,9 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
   }
 
   Future<void> _handleSubmit() async {
-    final configAsync = ref.read(appConfigProvider);
-    final config = configAsync.value;
-    if (config == null) return;
-
+    final isSuperAdmin = ref.read(isSuperAdminProvider);
     setState(() => _isSubmitting = true);
-    
+
     try {
       // 1. Upload images first
       List<String> imageUrls = List<String>.from(_formData.existingImageUrls);
@@ -158,6 +156,25 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
           imageUrls: imageUrls,
         );
         await _onSuccess();
+        return;
+      }
+
+      // ── Superadmin: post instantly, skip payment entirely ──────────────
+      if (isSuperAdmin) {
+        await EventPostService.instance.submitSuperAdminEvent(
+          eventData: _formData.toMap(),
+          imageUrls: imageUrls,
+          eventDurationDays: 365,
+        );
+        await _onSuccess();
+        return;
+      }
+
+      // ── Normal flow ────────────────────────────────────────────────────
+      final configAsync = ref.read(appConfigProvider);
+      final config = configAsync.value;
+      if (config == null) {
+        setState(() => _isSubmitting = false);
         return;
       }
 

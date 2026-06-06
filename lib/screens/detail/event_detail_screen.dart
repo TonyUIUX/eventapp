@@ -6,6 +6,7 @@ import '../../models/event_model.dart';
 import '../../providers/saved_events_provider.dart';
 import '../../providers/events_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../services/event_post_service.dart';
 import '../../services/analytics_service.dart';
 import '../../services/rating_service.dart';
 import '../../services/personalization_service.dart';
@@ -31,7 +32,9 @@ class EventDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isSaved = ref.watch(savedEventIdsProvider).contains(event.id);
     final user = ref.watch(authStateProvider).value;
+    final isSuperAdmin = ref.watch(isSuperAdminProvider);
     final isOwner = user != null && event.postedBy != null && user.uid == event.postedBy;
+    final canEdit = isSuperAdmin || isOwner;
 
     // Analytics (only track once, but this is simple)
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -59,7 +62,7 @@ class EventDetailScreen extends ConsumerWidget {
               ),
             ),
             actions: [
-              if (isOwner)
+              if (canEdit)
                 _GlassHeaderAction(
                   icon: Icons.edit_rounded,
                   onTap: () {
@@ -75,7 +78,7 @@ class EventDetailScreen extends ConsumerWidget {
                 onTap: () => _handleShare(event),
               ),
               const SizedBox(width: 8),
-              _GlassHeaderOverflow(isOwner: isOwner),
+              _GlassHeaderOverflow(isOwner: isOwner, isSuperAdmin: isSuperAdmin, event: event),
               const SizedBox(width: 8),
             ],
             flexibleSpace: FlexibleSpaceBar(
@@ -263,7 +266,14 @@ class _GlassHeaderAction extends StatelessWidget {
 
 class _GlassHeaderOverflow extends StatelessWidget {
   final bool isOwner;
-  const _GlassHeaderOverflow({required this.isOwner});
+  final bool isSuperAdmin;
+  final EventModel event;
+
+  const _GlassHeaderOverflow({
+    required this.isOwner,
+    required this.isSuperAdmin,
+    required this.event,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -283,7 +293,7 @@ class _GlassHeaderOverflow extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppRadius.md),
             side: const BorderSide(color: AppColors.glassBorder),
           ),
-          onSelected: (value) {
+          onSelected: (value) async {
             if (value == 'report') {
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 content: Text('Report submitted.', style: AppTextStyles.body.copyWith(color: AppColors.textPrimary)),
@@ -291,13 +301,48 @@ class _GlassHeaderOverflow extends StatelessWidget {
                 behavior: SnackBarBehavior.floating,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: AppColors.glassBorder)),
               ));
+            } else if (value == 'delete') {
+              final confirmed = await showDialog<bool>(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  backgroundColor: AppColors.backgroundSheet,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.xl),
+                    side: const BorderSide(color: AppColors.glassBorder),
+                  ),
+                  title: Text('Delete Event?', style: AppTextStyles.heading2.copyWith(color: Colors.white)),
+                  content: Text(
+                    'This will hide the event immediately. This action cannot be undone.',
+                    style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, false),
+                      child: Text('Cancel', style: AppTextStyles.label.copyWith(color: Colors.white)),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, true),
+                      child: Text('Delete', style: AppTextStyles.label.copyWith(color: AppColors.error)),
+                    ),
+                  ],
+                ),
+              );
+              if (confirmed == true && context.mounted) {
+                await EventPostService.instance.deleteEvent(event.id);
+                if (context.mounted) Navigator.pop(context);
+              }
             }
           },
           itemBuilder: (context) => [
-            if (!isOwner)
+            if (!isOwner && !isSuperAdmin)
               PopupMenuItem(
                 value: 'report',
                 child: Text('Report Event', style: AppTextStyles.body.copyWith(color: AppColors.error)),
+              ),
+            if (isSuperAdmin)
+              PopupMenuItem(
+                value: 'delete',
+                child: Text('Delete Event', style: AppTextStyles.body.copyWith(color: AppColors.error)),
               ),
           ],
         ),

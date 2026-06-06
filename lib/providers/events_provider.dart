@@ -24,8 +24,8 @@ final userEventsProvider = StreamProvider.family<List<EventModel>, String>((ref,
 // Currently selected category chip — default 'all'
 final selectedCategoryProvider = StateProvider<String>((ref) => 'all');
 
-// Currently selected date filter — 'today', 'weekend', or 'week'
-final selectedDateFilterProvider = StateProvider<String>((ref) => 'week');
+// Currently selected date filter — 'all', 'today', or 'weekend'
+final selectedDateFilterProvider = StateProvider<String>((ref) => 'all');
 
 // ─── AI Personalization ───────────────────────────────────────────────────
 final categoryAffinitiesProvider = FutureProvider<Map<String, int>>((ref) async {
@@ -73,9 +73,8 @@ final filteredEventsProvider =
       } else if (dateFilter == 'weekend') {
         dateMatch = eventDate == saturday || eventDate == sunday;
       } else {
-        // 'week' — show next 7 days including today
-        final weekEnd = today.add(const Duration(days: 7));
-        dateMatch = !eventDate.isBefore(today) && !eventDate.isAfter(weekEnd);
+        // 'all' — every upcoming event (today onwards), never show past events
+        dateMatch = !eventDate.isBefore(today);
       }
 
       final categoryMatch =

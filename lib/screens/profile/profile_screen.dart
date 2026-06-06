@@ -48,6 +48,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with SingleTicker
         backgroundColor: AppColors.backgroundBase,
         body: ref.watch(currentUserProfileProvider).when(
           data: (user) {
+            final isSuperAdmin = ref.watch(isSuperAdminProvider);
             if (user == null) {
               return const Center(child: Text('User profile not found.', style: AppTextStyles.body));
             }
@@ -145,20 +146,38 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with SingleTicker
                                 ),
                                 const SizedBox(height: AppSpacing.md),
 
-                                // Name
+                                // Name + optional superadmin badge
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                              Text(
-                                user.displayName.isEmpty ? 'Evorra User' : user.displayName,
-                                style: AppTextStyles.heading1.copyWith(color: Colors.white),
-                              ),
-                              if (user.isVerifiedOrg) ...[
-                                const SizedBox(width: 4),
-                                const Icon(Icons.verified_rounded, color: AppColors.brandCoral, size: 20),
-                              ],
-                            ],
-                          ),
+                                    Text(
+                                      user.displayName.isEmpty ? 'Evorra User' : user.displayName,
+                                      style: AppTextStyles.heading1.copyWith(color: Colors.white),
+                                    ),
+                                    if (user.isVerifiedOrg) ...[
+                                      const SizedBox(width: 4),
+                                      const Icon(Icons.verified_rounded, color: AppColors.brandCoral, size: 20),
+                                    ],
+                                    if (isSuperAdmin) ...[
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                                        decoration: BoxDecoration(
+                                          gradient: AppColors.brandGradient,
+                                          borderRadius: BorderRadius.circular(100),
+                                        ),
+                                        child: Text(
+                                          '⚡ ADMIN',
+                                          style: AppTextStyles.caption.copyWith(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w700,
+                                            letterSpacing: 1.2,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
                           
                           // Bio
                           if (user.bio != null && user.bio!.isNotEmpty) ...[

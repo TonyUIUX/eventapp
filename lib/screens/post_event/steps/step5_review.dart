@@ -6,6 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_text_styles.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../providers/app_config_provider.dart';
+import '../../../../providers/auth_provider.dart';
 import '../../../../core/widgets/gradient_button.dart';
 import '../../../../core/widgets/dark_shimmer.dart';
 
@@ -26,6 +27,7 @@ class Step5Review extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isSuperAdmin = ref.watch(isSuperAdminProvider);
     final configAsync = ref.watch(appConfigProvider);
     
     return SingleChildScrollView(
@@ -53,83 +55,125 @@ class Step5Review extends ConsumerWidget {
             child: Divider(color: AppColors.glassBorder),
           ),
           
-          configAsync.when(
-            data: (config) {
-              final fee = config.postingFee / 100;
-              return Column(
+          const SizedBox(height: AppSpacing.xxl),
+
+          // ── Submit Button ─────────────────────────────────────────────
+          if (isSuperAdmin) ...[
+            // Superadmin: instant publish — no payment, no review
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: AppColors.backgroundCard,
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+                border: Border.all(color: AppColors.brandCoral.withValues(alpha: 0.5)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.bolt_rounded, color: AppColors.brandCoral, size: 20),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Admin Publish', style: AppTextStyles.label.copyWith(color: Colors.white)),
+                        Text(
+                          'Your event will go LIVE instantly.',
+                          style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+                        ),
+                      ],
+                    ),
+                  ),
+                  ShaderMask(
+                    shaderCallback: (b) => AppColors.brandGradient.createShader(b),
+                    blendMode: BlendMode.srcIn,
+                    child: const Text('FREE', style: AppTextStyles.heading3),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            SizedBox(
+              width: double.infinity,
+              child: GradientButton(
+                label: '⚡  Post Instantly',
+                isLoading: isSubmitting,
+                height: 56,
+                onTap: isSubmitting ? () {} : onConfirm,
+              ),
+            ),
+          ] else ...[
+            // Normal user: show fee info from config
+            configAsync.when(
+              data: (config) {
+                final fee = config.postingFee / 100;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('PUBLISHING FEE', style: AppTextStyles.caption.copyWith(color: AppColors.brandCoral)),
+                    const SizedBox(height: AppSpacing.sm),
+                    Container(
+                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      decoration: BoxDecoration(
+                        color: AppColors.backgroundCard,
+                        borderRadius: BorderRadius.circular(AppRadius.lg),
+                        border: Border.all(color: config.requiresPayment ? AppColors.glassBorder : AppColors.brandCoral.withValues(alpha: 0.5)),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(config.requiresPayment ? 'Standard Listing' : 'Promotional Offer', style: AppTextStyles.label.copyWith(color: Colors.white)),
+                              const SizedBox(height: AppSpacing.xs),
+                              Text(
+                                config.requiresPayment ? 'Secure payment via Razorpay' : 'List your event for free',
+                                style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+                              ),
+                            ],
+                          ),
+                          if (config.requiresPayment)
+                            Text('₹${fee.toStringAsFixed(0)}', style: AppTextStyles.heading1.copyWith(color: Colors.white))
+                          else
+                            ShaderMask(
+                              shaderCallback: (bounds) => AppColors.brandGradient.createShader(bounds),
+                              blendMode: BlendMode.srcIn,
+                              child: const Text('FREE', style: AppTextStyles.heading1),
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    _TermBullet(text: 'Your event will be live for ${config.eventDurationDays} days after approval.'),
+                    const _TermBullet(text: 'Moderation takes up to 24 hours.'),
+                    if (!config.requiresPayment)
+                      _TermBullet(text: config.freePeriodReason, isItalic: true),
+                    const SizedBox(height: AppSpacing.lg),
+                    SizedBox(
+                      width: double.infinity,
+                      child: GradientButton(
+                        label: config.requiresPayment ? 'Pay & Submit' : 'Submit for Review',
+                        isLoading: isSubmitting,
+                        height: 56,
+                        onTap: isSubmitting ? () {} : onConfirm,
+                      ),
+                    ),
+                  ],
+                );
+              },
+              loading: () => Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('PUBLISHING FEE', style: AppTextStyles.caption.copyWith(color: AppColors.brandCoral)),
                   const SizedBox(height: AppSpacing.sm),
-                  
-                  // Fee Box
-                  Container(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    decoration: BoxDecoration(
-                      color: AppColors.backgroundCard,
-                      borderRadius: BorderRadius.circular(AppRadius.lg),
-                      border: Border.all(color: config.requiresPayment ? AppColors.glassBorder : AppColors.brandCoral.withValues(alpha: 0.5)),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(config.requiresPayment ? 'Standard Listing' : 'Promotional Offer', style: AppTextStyles.label.copyWith(color: Colors.white)),
-                            const SizedBox(height: AppSpacing.xs),
-                            Text(
-                              config.requiresPayment ? 'Secure payment via Razorpay' : 'List your event for free',
-                              style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
-                            ),
-                          ],
-                        ),
-                        if (config.requiresPayment)
-                          Text('₹${fee.toStringAsFixed(0)}', style: AppTextStyles.heading1.copyWith(color: Colors.white))
-                        else
-                          ShaderMask(
-                            shaderCallback: (bounds) => AppColors.brandGradient.createShader(bounds),
-                            blendMode: BlendMode.srcIn,
-                            child: const Text('FREE', style: AppTextStyles.heading1),
-                          ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  
-                  // Terms Bullets
-                  _TermBullet(text: 'Your event will be live for ${config.eventDurationDays} days after approval.'),
-                  const _TermBullet(text: 'Moderation takes up to 24 hours.'),
-                  if (!config.requiresPayment)
-                    _TermBullet(text: config.freePeriodReason, isItalic: true),
+                  const DarkShimmer(width: double.infinity, height: 80, borderRadius: AppRadius.lg),
                 ],
-              );
-            },
-            loading: () => Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('PUBLISHING FEE', style: AppTextStyles.caption.copyWith(color: AppColors.brandCoral)),
-                const SizedBox(height: AppSpacing.sm),
-                const DarkShimmer(width: double.infinity, height: 80, borderRadius: AppRadius.lg),
-              ],
+              ),
+              error: (_, __) => Text('Error loading platform config', style: AppTextStyles.body.copyWith(color: AppColors.error)),
             ),
-            error: (_, __) => Text('Error loading platform config', style: AppTextStyles.body.copyWith(color: AppColors.error)),
-          ),
-          
+          ],
+
           const SizedBox(height: AppSpacing.xxl),
-          
-          // Submit Button
-          SizedBox(
-            width: double.infinity,
-            child: GradientButton(
-              label: configAsync.valueOrNull?.requiresPayment == true ? 'Pay & Submit' : 'Submit for Review',
-              isLoading: isSubmitting,
-              height: 56,
-              onTap: isSubmitting || configAsync.isLoading ? () {} : onConfirm,
-            ),
-          ),
-          
-          const SizedBox(height: AppSpacing.xxl), // Bottom padding
         ],
       ),
     );
