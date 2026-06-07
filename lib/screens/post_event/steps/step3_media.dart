@@ -1,7 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:image_cropper/image_cropper.dart';
 import '../../../../models/post_event_form_data.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_text_styles.dart';
@@ -18,33 +17,20 @@ class Step3Media extends StatelessWidget {
   const Step3Media({super.key, required this.formData, required this.onUpdate});
 
   Future<void> _pickImage() async {
-    final picked = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 70);
-    if (picked != null) {
-      final croppedFile = await ImageCropper().cropImage(
-        sourcePath: picked.path,
-        aspectRatio: const CropAspectRatio(ratioX: 16, ratioY: 9),
-        uiSettings: [
-          AndroidUiSettings(
-            toolbarTitle: 'Crop Event Photo',
-            toolbarColor: AppColors.backgroundCard,
-            toolbarWidgetColor: Colors.white,
-            initAspectRatio: CropAspectRatioPreset.ratio16x9,
-            lockAspectRatio: true,
-            backgroundColor: AppColors.backgroundBase,
-            activeControlsWidgetColor: AppColors.brandCoral,
-          ),
-          IOSUiSettings(
-            title: 'Crop Event Photo',
-            aspectRatioLockEnabled: true,
-          ),
-        ],
+    try {
+      final picked = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+        maxWidth: 1280,
+        maxHeight: 720, // 16:9 ratio enforced at picker level
       );
+      if (picked == null) return; // user cancelled
 
-      if (croppedFile != null) {
-        final bytes = await croppedFile.readAsBytes();
-        formData.images.add(bytes);
-        onUpdate();
-      }
+      final bytes = await picked.readAsBytes();
+      formData.images.add(bytes);
+      onUpdate();
+    } catch (e) {
+      debugPrint('_pickImage error: $e');
     }
   }
 

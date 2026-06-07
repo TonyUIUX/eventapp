@@ -137,15 +137,38 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
     setState(() => _isSubmitting = true);
 
     try {
-      // 1. Upload images first
+      // 1. Upload images — gracefully skip if Storage is unavailable
       List<String> imageUrls = List<String>.from(_formData.existingImageUrls);
+      bool storageError = false;
       for (var i = 0; i < _formData.images.length; i++) {
-        final url = await StorageService().uploadEventImage(
-          _formData.images[i],
-          'user_post_${DateTime.now().millisecondsSinceEpoch}',
-          'img_$i.jpg',
+        try {
+          final url = await StorageService().uploadEventImage(
+            _formData.images[i],
+            'user_post_${DateTime.now().millisecondsSinceEpoch}',
+            'img_$i.jpg',
+          );
+          imageUrls.add(url);
+        } catch (uploadErr) {
+          storageError = true;
+          debugPrint('StorageService upload error: $uploadErr');
+        }
+      }
+      if (storageError && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Image upload failed — submitting event without photos.',
+              style: AppTextStyles.body.copyWith(color: AppColors.textPrimary),
+            ),
+            backgroundColor: AppColors.backgroundCard,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 4),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: const BorderSide(color: AppColors.glassBorder),
+            ),
+          ),
         );
-        imageUrls.add(url);
       }
 
       if (_formData.eventIdToEdit != null) {

@@ -1,47 +1,49 @@
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/foundation.dart';
+import 'dart:typed_data';
+import 'storage/cloudinary_storage_service.dart';
+import 'storage/firebase_storage_service.dart';
 
-// Firebase Storage service — cross-platform (uses Uint8List, not dart:io File)
-// Used by the Admin Panel for event image management.
+// ─────────────────────────────────────────────────────────────────────────────
+// StorageService — Facade
+//
+// ⚡ TO SWITCH STORAGE PROVIDER:
+//   • Cloudinary (current, free):  _useCloudinary = true
+//   • Firebase Storage (needs Blaze plan): _useCloudinary = false
+//
+// Both implementations are fully preserved in lib/services/storage/
+// ─────────────────────────────────────────────────────────────────────────────
 class StorageService {
-  final _storage = FirebaseStorage.instance;
-  static const _eventsPath = 'events';
+  // ✅ Change this ONE line to switch providers:
+  static const bool _useCloudinary = true;
 
-  /// Upload image bytes and return the public download URL.
-  /// [eventId]  — Firestore document ID of the event
-  /// [filename] — e.g. 'cover.jpg' or '${uuid}.jpg'
+  final _cloudinary = CloudinaryStorageService();
+  final _firebase = FirebaseStorageService();
+
+  /// Upload event image bytes — returns public CDN/download URL.
   Future<String> uploadEventImage(
     Uint8List imageBytes,
     String eventId,
     String filename,
-  ) async {
-    final ref = _storage.ref().child('$_eventsPath/$eventId/$filename');
-    final metadata = SettableMetadata(contentType: 'image/jpeg');
-    final task = await ref.putData(imageBytes, metadata);
-    return task.ref.getDownloadURL();
-  }
+  ) =>
+      _useCloudinary
+          ? _cloudinary.uploadEventImage(imageBytes, eventId, filename)
+          : _firebase.uploadEventImage(imageBytes, eventId, filename);
 
-  /// Delete a single image by its full download URL.
-  Future<void> deleteImage(String downloadUrl) async {
-    try {
-      await _storage.refFromURL(downloadUrl).delete();
-    } catch (e) {
-      debugPrint('StorageService.deleteImage error: $e');
-    }
-  }
+  /// Upload profile image bytes — returns public CDN/download URL.
+  Future<String> uploadProfileImage(
+          Uint8List imageBytes, String userId) =>
+      _useCloudinary
+          ? _cloudinary.uploadProfileImage(imageBytes, userId)
+          : _firebase.uploadProfileImage(imageBytes, userId);
 
-  /// List all image download URLs for a given event.
-  Future<List<String>> getEventImages(String eventId) async {
-    final result =
-        await _storage.ref().child('$_eventsPath/$eventId').listAll();
-    return Future.wait(result.items.map((item) => item.getDownloadURL()));
-  }
+  /// Delete image by URL.
+  Future<void> deleteImage(String downloadUrl) =>
+      _useCloudinary
+          ? _cloudinary.deleteImage(downloadUrl)
+          : _firebase.deleteImage(downloadUrl);
 
-  /// Upload user profile image and return the public download URL.
-  Future<String> uploadProfileImage(Uint8List imageBytes, String userId) async {
-    final ref = _storage.ref().child('profiles/$userId/avatar.jpg');
-    final metadata = SettableMetadata(contentType: 'image/jpeg');
-    final task = await ref.putData(imageBytes, metadata);
-    return task.ref.getDownloadURL();
-  }
+  /// List all image URLs for an event.
+  Future<List<String>> getEventImages(String eventId) =>
+      _useCloudinary
+          ? _cloudinary.getEventImages(eventId)
+          : _firebase.getEventImages(eventId);
 }
