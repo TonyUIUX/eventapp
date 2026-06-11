@@ -52,6 +52,7 @@ dependencies:
   image_cropper: ^8.0.0
   flutter_native_splash: ^2.4.7
   http: ^1.2.0
+  webview_flutter: ^4.10.0
 
 dev_dependencies:
   flutter_test:

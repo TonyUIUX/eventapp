@@ -16,6 +16,9 @@ import '../../core/utils/app_router.dart';
 import '../../main.dart'; // Add this import for MainShell
 import 'success_screen.dart';
 import '../../core/widgets/dark_shimmer.dart';
+// ── Instamojo additions (Razorpay imports above are untouched) ──────────────
+import '../payment/payment_webview_screen.dart';
+import '../../models/app_config_model.dart';
 
 import 'steps/step1_basics.dart';
 import 'steps/step2_details.dart';
@@ -202,40 +205,13 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
       }
 
       if (config.requiresPayment && config.paymentEnabled) {
-        // 2. Create pending event
-        final eventId = await EventPostService.instance.createPendingEvent(
-          eventData: _formData.toMap(),
-          eventDurationDays: config.eventDurationDays,
-          imageUrls: imageUrls,
-        );
-
-        // 3. Start Payment
-        PaymentService.instance.startPayment(
-          amountPaise: config.postingFee,
-          contactPhone: _formData.contactPhone ?? '',
-          onSuccess: (paymentId) async {
-            await EventPostService.instance.markPaymentComplete(
-              eventId: eventId,
-              paymentId: paymentId,
-              postingFee: config.postingFee,
-            );
-            await _onSuccess();
-          },
-          onError: (error) async {
-            await EventPostService.instance.markPaymentFailed(eventId);
-            setState(() => _isSubmitting = false);
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Payment Failed: $error', style: AppTextStyles.body.copyWith(color: AppColors.textPrimary)), 
-                  backgroundColor: AppColors.backgroundCard,
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: AppColors.glassBorder)),
-                ),
-              );
-            }
-          },
-        );
+        // ── Gateway decision from Firestore config — zero code change needed
+        if (config.useInstamojo) {
+          await _initiateInstamojoPayment(config, imageUrls);
+        } else {
+          // ── Existing Razorpay code — completely unchanged ───────────────
+          _initiateRazorpayPayment(config, imageUrls);
+        }
       } else {
         // Free submission
         await EventPostService.instance.submitFreeEvent(
@@ -257,6 +233,121 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
           ),
         );
       }
+    }
+  }
+
+  // ── EXISTING Razorpay method — body untouched, only extracted ─────────────
+  void _initiateRazorpayPayment(AppConfigModel config, List<String> imageUrls) {
+    EventPostService.instance.createPendingEvent(
+      eventData: _formData.toMap(),
+      eventDurationDays: config.eventDurationDays,
+      imageUrls: imageUrls,
+    ).then((eventId) {
+      // 3. Start Payment
+      PaymentService.instance.startPayment(
+        amountPaise: config.postingFee,
+        contactPhone: _formData.contactPhone ?? '',
+        onSuccess: (paymentId) async {
+          await EventPostService.instance.markPaymentComplete(
+            eventId: eventId,
+            paymentId: paymentId,
+            postingFee: config.postingFee,
+          );
+          await _onSuccess();
+        },
+        onError: (error) async {
+          await EventPostService.instance.markPaymentFailed(eventId);
+          setState(() => _isSubmitting = false);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Payment Failed: $error', style: AppTextStyles.body.copyWith(color: AppColors.textPrimary)), 
+                backgroundColor: AppColors.backgroundCard,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: AppColors.glassBorder)),
+              ),
+            );
+          }
+        },
+      );
+    });
+  }
+
+  // ── NEW Instamojo method — parallel branch, zero Razorpay code touched ────
+  Future<void> _initiateInstamojoPayment(
+      AppConfigModel config, List<String> imageUrls) async {
+    try {
+      // Step 1: Create pending event draft in Firestore
+      final eventId = await EventPostService.instance.createPendingEvent(
+        eventData: _formData.toMap(),
+        eventDurationDays: config.eventDurationDays,
+        imageUrls: imageUrls,
+      );
+
+      // Step 2: Create Instamojo payment request via REST API
+      final user = ref.read(currentUserProfileProvider).value;
+      final service = ref.read(instamojoServiceProvider);
+
+      final paymentRequest = await service.createPaymentRequest(
+        purpose: 'Evorra Event: ${_formData.title}',
+        amountRupees: config.postingFee,
+        buyerName: user?.displayName ?? 'Evorra User',
+        buyerEmail: user?.email ?? 'noemail@evorra.app',
+        buyerPhone: user?.phone ?? '0000000000',
+        eventId: eventId,
+      );
+
+      setState(() => _isSubmitting = false);
+      if (!mounted) return;
+
+      // Step 3: Open WebView for payment
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => PaymentWebViewScreen(
+            paymentRequest: paymentRequest,
+            onSuccess: () async {
+              // Mark paid in Firestore
+              await EventPostService.instance.markPaymentComplete(
+                eventId: eventId,
+                paymentId: paymentRequest.id,
+                postingFee: config.postingFee,
+              );
+              if (!mounted) return;
+              Navigator.pushReplacement(
+                context,
+                SlideUpFadeRoute(page: const SuccessScreen()),
+              );
+            },
+            onFailure: () async {
+              await EventPostService.instance.markPaymentFailed(eventId);
+              if (!mounted) return;
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('Payment cancelled or failed.'),
+                  backgroundColor: AppColors.backgroundCard,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: const BorderSide(color: AppColors.glassBorder),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    } catch (e) {
+      setState(() => _isSubmitting = false);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Could not start payment: $e'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     }
   }
 

@@ -31,6 +31,7 @@ class _PricingManagementScreenState extends ConsumerState<PricingManagementScree
   bool _showPromoBanner = false;
   bool _paymentEnabled = true;
   String _razorpayMode = 'test';
+  String _activeGateway = 'razorpay'; // 'razorpay' | 'instamojo'
   bool _isSaving = false;
 
   @override
@@ -65,6 +66,7 @@ class _PricingManagementScreenState extends ConsumerState<PricingManagementScree
     _showPromoBanner = config.showPromoBanner;
     _paymentEnabled = config.paymentEnabled;
     _razorpayMode = config.razorpayMode;
+    _activeGateway = config.activeGateway;
   }
 
   Future<void> _handleSave() async {
@@ -107,6 +109,7 @@ class _PricingManagementScreenState extends ConsumerState<PricingManagementScree
         'freePeriodEndsAt': _freePeriodEndsAt != null ? Timestamp.fromDate(_freePeriodEndsAt!) : null,
         'paymentEnabled': _paymentEnabled,
         'razorpayMode': _razorpayMode,
+        'activeGateway': _activeGateway,
         'showPromoBanner': _showPromoBanner,
         'promoBannerText': _promoTextController.text,
         'promoBannerLink': _promoLinkController.text.isEmpty ? null : _promoLinkController.text,
@@ -375,6 +378,42 @@ class _PricingManagementScreenState extends ConsumerState<PricingManagementScree
                         setState(() => _paymentEnabled = v);
                       },
                     ),
+                    const Divider(),
+                    // ── Gateway selector ──────────────────────────────────────────
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Active Payment Gateway',
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Admin switches here — zero code change needed. Takes effect instantly.',
+                      style: TextStyle(fontSize: 11, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _GatewayOption(
+                            label: 'Razorpay',
+                            subtitle: 'UPI, Cards, Wallets',
+                            value: 'razorpay',
+                            selected: _activeGateway,
+                            onTap: () => setState(() => _activeGateway = 'razorpay'),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _GatewayOption(
+                            label: 'Instamojo',
+                            subtitle: 'UPI, Cards, Net banking',
+                            value: 'instamojo',
+                            selected: _activeGateway,
+                            onTap: () => setState(() => _activeGateway = 'instamojo'),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
 
@@ -573,6 +612,65 @@ class _InputField extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ── Gateway selector tile ──────────────────────────────────────────────────
+class _GatewayOption extends StatelessWidget {
+  final String label;
+  final String subtitle;
+  final String value;
+  final String selected;
+  final VoidCallback onTap;
+
+  const _GatewayOption({
+    required this.label,
+    required this.subtitle,
+    required this.value,
+    required this.selected,
+    required this.onTap,
+  });
+
+  bool get isSelected => value == selected;
+
+  @override
+  Widget build(BuildContext context) {
+    const activeColor = Color(0xFFFF5247); // Evorra coral
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: isSelected ? activeColor : Colors.grey.shade300,
+            width: isSelected ? 1.5 : 1,
+          ),
+          borderRadius: BorderRadius.circular(12),
+          color: isSelected
+              ? activeColor.withValues(alpha: 0.06)
+              : Colors.grey.shade50,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: 13,
+                color: isSelected ? activeColor : Colors.grey.shade800,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              subtitle,
+              style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
