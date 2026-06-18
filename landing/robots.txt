@@ -1,0 +1,9 @@
+# Evorra — robots.txt
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://evorra.app/sitemap.xml
+
+# Block access to source map files
+Disallow: /*.map$

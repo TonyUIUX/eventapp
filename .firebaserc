@@ -10,6 +10,9 @@
         ],
         "main": [
           "kochigo-main-app"
+        ],
+        "landing": [
+          "kochigo-landing"
         ]
       }
     }
