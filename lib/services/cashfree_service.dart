@@ -87,7 +87,9 @@ class CashfreeService {
     required String customerName,
     required String eventId,
   }) async {
-    final orderId = 'evorra_${eventId}_${DateTime.now().millisecondsSinceEpoch}';
+    // Cashfree order_id max length = 50 chars
+    final rawId = 'ev_${eventId}_${DateTime.now().millisecondsSinceEpoch}';
+    final orderId = rawId.length > 50 ? rawId.substring(rawId.length - 50) : rawId;
 
     final response = await http.post(
       Uri.parse('${CashfreeConfig.orderApiBaseUrl}/orders'),
@@ -105,7 +107,7 @@ class CashfreeService {
           'customer_id': customerId,
           'customer_name': customerName,
           'customer_email': customerEmail,
-          'customer_phone': customerPhone.replaceAll(RegExp(r'\D'), ''),
+          'customer_phone': _sanitizePhone(customerPhone),
         },
         'order_meta': {
           'notify_url': '',
@@ -135,7 +137,7 @@ class CashfreeService {
   /// Make sure [setCallback] was called first (in initState of your widget).
   void doPayment(CashfreeOrder order) {
     try {
-      const environment =
+      final environment =
           CashfreeConfig.useSandbox ? CFEnvironment.SANDBOX : CFEnvironment.PRODUCTION;
 
       final session = CFSessionBuilder()
@@ -178,5 +180,12 @@ class CashfreeService {
       debugPrint('[Cashfree] Verify error: $e');
       return false;
     }
+  }
+
+  /// Strips non-digits and ensures exactly 10-digit phone for Cashfree.
+  String _sanitizePhone(String phone) {
+    final digits = phone.replaceAll(RegExp(r'\D'), '');
+    if (digits.length >= 10) return digits.substring(digits.length - 10);
+    return digits.padLeft(10, '0'); // fallback — should not happen in prod
   }
 }

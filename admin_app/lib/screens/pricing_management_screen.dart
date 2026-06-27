@@ -31,7 +31,7 @@ class _PricingManagementScreenState extends ConsumerState<PricingManagementScree
   bool _showPromoBanner = false;
   bool _paymentEnabled = true;
   String _razorpayMode = 'test';
-  String _activeGateway = 'razorpay'; // 'razorpay' | 'instamojo'
+  String _activeGateway = 'cashfree'; // 'cashfree' | 'razorpay' | 'instamojo'
   bool _isSaving = false;
 
   @override
@@ -395,6 +395,16 @@ class _PricingManagementScreenState extends ConsumerState<PricingManagementScree
                       children: [
                         Expanded(
                           child: _GatewayOption(
+                            label: 'Cashfree',
+                            subtitle: 'UPI, Cards, Wallets',
+                            value: 'cashfree',
+                            selected: _activeGateway,
+                            onTap: () => setState(() => _activeGateway = 'cashfree'),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: _GatewayOption(
                             label: 'Razorpay',
                             subtitle: 'UPI, Cards, Wallets',
                             value: 'razorpay',
@@ -402,7 +412,7 @@ class _PricingManagementScreenState extends ConsumerState<PricingManagementScree
                             onTap: () => setState(() => _activeGateway = 'razorpay'),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 8),
                         Expanded(
                           child: _GatewayOption(
                             label: 'Instamojo',

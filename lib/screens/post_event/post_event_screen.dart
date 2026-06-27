@@ -367,6 +367,8 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
       // Step 2: Create Cashfree order via REST API
       final user = ref.read(currentUserProfileProvider).value;
       final cashfreeService = ref.read(cashfreeServiceProvider);
+      final phone = user?.phone?.isNotEmpty == true ? user!.phone! : '9999999999';
+      debugPrint('[Cashfree] Starting payment for eventId=$eventId user=${user?.uid}');
 
       // Register callbacks BEFORE doPayment
       cashfreeService.setCallback(
@@ -425,27 +427,30 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
 
       // Create order (server-side call via REST API)
       final order = await cashfreeService.createOrder(
-        amountRupees: config.postingFee ~/ 100, // convert paise to rupees
+        amountRupees: config.postingFee ~/ 100,
         customerId: user?.uid ?? 'guest',
         customerEmail: user?.email ?? 'noemail@evorra.app',
-        customerPhone: user?.phone ?? '9999999999',
+        customerPhone: phone,
         customerName: user?.displayName ?? 'Evorra User',
         eventId: eventId,
       );
+      debugPrint('[Cashfree] Order created: ${order.orderId} session=${order.paymentSessionId}');
 
-      setState(() => _isSubmitting = false);
       if (!mounted) return;
+      setState(() => _isSubmitting = false);
 
-      // Step 4: Open Cashfree WebView checkout
+      // Step 4: Open Cashfree WebView checkout — do NOT await, SDK handles async via callbacks
       cashfreeService.doPayment(order);
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('[Cashfree] Error: $e\n$st');
       setState(() => _isSubmitting = false);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Could not start Cashfree payment: $e'),
+          content: Text('Payment error: $e'),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 6),
         ),
       );
     }

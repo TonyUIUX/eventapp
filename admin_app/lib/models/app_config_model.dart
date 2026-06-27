@@ -41,7 +41,7 @@ class AppConfigModel {
     required this.updatedAt,
     required this.updatedBy,
     this.changeLog,
-    this.activeGateway = 'razorpay',
+    this.activeGateway = 'cashfree',
   });
 
   bool get requiresPayment => !isFreePeriod && paymentEnabled;
@@ -49,6 +49,7 @@ class AppConfigModel {
   /// Gateway computed getters — single source of truth.
   bool get useInstamojo => activeGateway == 'instamojo';
   bool get useRazorpay  => activeGateway == 'razorpay';
+  bool get useCashfree  => activeGateway == 'cashfree';
 
   bool get freePeriodEndingSoon {
     if (freePeriodEndsAt == null) return false;
@@ -76,7 +77,7 @@ class AppConfigModel {
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       updatedBy: data['updatedBy'] ?? 'system',
       changeLog: data['changeLog'],
-      activeGateway: data['activeGateway'] ?? 'instamojo',
+      activeGateway: data['activeGateway'] ?? 'cashfree',
     );
   }
 
@@ -123,7 +124,7 @@ class AppConfigModel {
       maintenanceMessage: 'Evorra is upgrading to serve you better!',
       updatedAt: DateTime.now(),
       updatedBy: 'system',
-      activeGateway: 'instamojo',
+      activeGateway: 'cashfree',
     );
   }
 }

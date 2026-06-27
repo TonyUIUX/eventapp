@@ -18,8 +18,8 @@ const auth = admin.auth();
 
 const users = [
     {
-        email: "admin@kochigo.com",
-        password: "Test@1234",
+        email: "admin@evorra.com",
+        password: "sajime123",
         displayName: "KochiGo Admin",
         isVerifiedOrg: true,
         role: "admin"

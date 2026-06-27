@@ -50,11 +50,16 @@ class Step1Basics extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
           TapScale(
             onTap: () async {
+              final now = DateTime.now();
+              // Clamp to today if the existing date is in the past (e.g. editing an old pending event)
+              final initialDate = (formData.date != null && formData.date!.isAfter(now))
+                  ? formData.date!
+                  : now;
               final date = await showDatePicker(
                 context: context,
-                initialDate: formData.date ?? DateTime.now(),
-                firstDate: DateTime.now(),
-                lastDate: DateTime.now().add(const Duration(days: 365)),
+                initialDate: initialDate,
+                firstDate: now,
+                lastDate: now.add(const Duration(days: 365)),
                 builder: (context, child) {
                   return Theme(
                     data: Theme.of(context).copyWith(
