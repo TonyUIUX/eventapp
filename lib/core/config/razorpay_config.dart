@@ -1,6 +1,6 @@
 class RazorpayConfig {
   // ↓↓↓ Paste your Razorpay Test Key here ↓↓↓
-  static const String testKey = 'rzp_test_YOUR_KEY_HERE';
+  static const String testKey = 'rzp_test_T2zqXbrRfnJsU4';
   
   // ↓↓↓ Paste your Razorpay Live Key here (for production) ↓↓↓
   static const String prodKey = 'rzp_live_YOUR_KEY_HERE';
@@ -10,3 +10,4 @@ class RazorpayConfig {
   
   static String get activeKey => useLiveKey ? prodKey : testKey;
 }
+

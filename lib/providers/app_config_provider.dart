@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/app_config_model.dart';
 import '../services/instamojo_service.dart';
+import '../services/cashfree_service.dart';
 
 final appConfigProvider = StreamProvider<AppConfigModel>((ref) {
   return FirebaseFirestore.instance
@@ -29,3 +30,10 @@ final maintenanceModeProvider = Provider<bool>((ref) {
 final instamojoServiceProvider = Provider<InstamojoService>(
   (ref) => InstamojoService(),
 );
+
+/// Provides a singleton CashfreeService for Riverpod-managed access.
+/// Use via: ref.read(cashfreeServiceProvider)
+final cashfreeServiceProvider = Provider<CashfreeService>(
+  (ref) => CashfreeService.instance,
+);
+

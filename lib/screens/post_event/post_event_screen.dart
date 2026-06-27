@@ -19,7 +19,7 @@ import '../../core/widgets/dark_shimmer.dart';
 // ── Instamojo additions (Razorpay imports above are untouched) ──────────────
 import '../payment/payment_webview_screen.dart';
 import '../../models/app_config_model.dart';
-
+// ── Cashfree — provided via cashfreeServiceProvider (app_config_provider.dart) ─────
 import 'steps/step1_basics.dart';
 import 'steps/step2_details.dart';
 import 'steps/step3_media.dart';
@@ -208,6 +208,8 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
         // ── Gateway decision from Firestore config — zero code change needed
         if (config.useInstamojo) {
           await _initiateInstamojoPayment(config, imageUrls);
+        } else if (config.useCashfree) {
+          await _initiateCashfreePayment(config, imageUrls);
         } else {
           // ── Existing Razorpay code — completely unchanged ───────────────
           _initiateRazorpayPayment(config, imageUrls);
@@ -344,6 +346,104 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Could not start payment: $e'),
+          backgroundColor: AppColors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  // ── NEW Cashfree method — parallel branch, zero Razorpay/Instamojo touched ──
+  Future<void> _initiateCashfreePayment(
+      AppConfigModel config, List<String> imageUrls) async {
+    try {
+      // Step 1: Create pending event draft in Firestore
+      final eventId = await EventPostService.instance.createPendingEvent(
+        eventData: _formData.toMap(),
+        eventDurationDays: config.eventDurationDays,
+        imageUrls: imageUrls,
+      );
+
+      // Step 2: Create Cashfree order via REST API
+      final user = ref.read(currentUserProfileProvider).value;
+      final cashfreeService = ref.read(cashfreeServiceProvider);
+
+      // Register callbacks BEFORE doPayment
+      cashfreeService.setCallback(
+        onSuccess: (orderId) async {
+          // Step 3a: Verify payment on success callback
+          final isPaid = await cashfreeService.verifyOrder(orderId);
+          if (isPaid) {
+            await EventPostService.instance.markPaymentComplete(
+              eventId: eventId,
+              paymentId: orderId,
+              postingFee: config.postingFee,
+            );
+            await _onSuccess();
+          } else {
+            await EventPostService.instance.markPaymentFailed(eventId);
+            setState(() => _isSubmitting = false);
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Payment verification failed. Please contact support.',
+                    style: AppTextStyles.body.copyWith(color: AppColors.textPrimary),
+                  ),
+                  backgroundColor: AppColors.backgroundCard,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: const BorderSide(color: AppColors.glassBorder),
+                  ),
+                ),
+              );
+            }
+          }
+        },
+        onError: (errorMessage, orderId) async {
+          await EventPostService.instance.markPaymentFailed(eventId);
+          setState(() => _isSubmitting = false);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Payment failed: $errorMessage',
+                  style: AppTextStyles.body.copyWith(color: AppColors.textPrimary),
+                ),
+                backgroundColor: AppColors.backgroundCard,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: const BorderSide(color: AppColors.glassBorder),
+                ),
+              ),
+            );
+          }
+        },
+      );
+
+      // Create order (server-side call via REST API)
+      final order = await cashfreeService.createOrder(
+        amountRupees: config.postingFee ~/ 100, // convert paise to rupees
+        customerId: user?.uid ?? 'guest',
+        customerEmail: user?.email ?? 'noemail@evorra.app',
+        customerPhone: user?.phone ?? '9999999999',
+        customerName: user?.displayName ?? 'Evorra User',
+        eventId: eventId,
+      );
+
+      setState(() => _isSubmitting = false);
+      if (!mounted) return;
+
+      // Step 4: Open Cashfree WebView checkout
+      cashfreeService.doPayment(order);
+    } catch (e) {
+      setState(() => _isSubmitting = false);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Could not start Cashfree payment: $e'),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
         ),

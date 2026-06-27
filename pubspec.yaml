@@ -53,6 +53,7 @@ dependencies:
   flutter_native_splash: ^2.4.7
   http: ^1.2.0
   webview_flutter: ^4.10.0
+  flutter_cashfree_pg_sdk: 2.4.0+52
 
 dev_dependencies:
   flutter_test:

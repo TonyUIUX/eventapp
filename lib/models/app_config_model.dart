@@ -47,8 +47,9 @@ class AppConfigModel {
   bool get requiresPayment => !isFreePeriod && paymentEnabled && postingFee > 0;
 
   /// Gateway computed getters — single source of truth.
-  bool get useInstamojo => activeGateway == 'instamojo';
-  bool get useRazorpay  => activeGateway == 'razorpay';
+  bool get useInstamojo  => activeGateway == 'instamojo';
+  bool get useRazorpay   => activeGateway == 'razorpay';
+  bool get useCashfree   => activeGateway == 'cashfree';
 
   bool get freePeriodEndingSoon {
     if (freePeriodEndsAt == null) return false;

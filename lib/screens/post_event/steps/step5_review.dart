@@ -127,7 +127,13 @@ class Step5Review extends ConsumerWidget {
                               Text(config.requiresPayment ? 'Standard Listing' : 'Promotional Offer', style: AppTextStyles.label.copyWith(color: Colors.white)),
                               const SizedBox(height: AppSpacing.xs),
                               Text(
-                                config.requiresPayment ? 'Secure payment via Razorpay' : 'List your event for free',
+                                config.requiresPayment
+                                    ? config.useCashfree
+                                        ? 'Secure payment via Cashfree'
+                                        : config.useInstamojo
+                                            ? 'Secure payment via Instamojo'
+                                            : 'Secure payment via Razorpay'
+                                    : 'List your event for free',
                                 style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
                               ),
                             ],

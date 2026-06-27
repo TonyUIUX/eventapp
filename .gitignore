@@ -50,3 +50,6 @@ key.properties
 .env
 node_modules/
 serviceAccountKey.json
+
+# Payment Gateway Keys (contains production secrets)
+lib/core/config/cashfree_config.dart
