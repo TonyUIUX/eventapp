@@ -16,6 +16,7 @@ class UserModel {
   final int totalViews;
   final int followersCount;
   final int followingCount;
+  final List<String> blockedUsers;
   final DateTime createdAt;
 
   const UserModel({
@@ -34,6 +35,7 @@ class UserModel {
     this.totalViews = 0,
     this.followersCount = 0,
     this.followingCount = 0,
+    this.blockedUsers = const [],
     required this.createdAt,
   });
 
@@ -55,6 +57,7 @@ class UserModel {
       totalViews: data['totalViews'] ?? 0,
       followersCount: data['followersCount'] ?? 0,
       followingCount: data['followingCount'] ?? 0,
+      blockedUsers: List<String>.from(data['blockedUsers'] ?? []),
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
@@ -79,6 +82,7 @@ class UserModel {
       'totalViews': totalViews,
       'followersCount': followersCount,
       'followingCount': followingCount,
+      'blockedUsers': blockedUsers,
       'createdAt': Timestamp.fromDate(createdAt),
     };
   }

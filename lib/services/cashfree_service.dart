@@ -94,48 +94,34 @@ class CashfreeService {
     required String customerName,
     required String eventId,
   }) async {
-    // Cashfree order_id max length = 50 chars
-    final rawId = 'ev_${eventId}_${DateTime.now().millisecondsSinceEpoch}';
-    final orderId = rawId.length > 50 ? rawId.substring(rawId.length - 50) : rawId;
-
     final response = await http.post(
-      Uri.parse('${CashfreeConfig.orderApiBaseUrl}/orders'),
+      Uri.parse('${CashfreeConfig.orderApiBaseUrl}/api/cashfree/create-order'),
       headers: {
         'Content-Type': 'application/json',
-        'x-api-version': CashfreeConfig.apiVersion,
-        'x-client-id': CashfreeConfig.appId,
-        'x-client-secret': CashfreeConfig.secretKey,
       },
       body: jsonEncode({
-        'order_id': orderId,
-        'order_amount': amountRupees.toStringAsFixed(2),
-        'order_currency': 'INR',
-        'customer_details': {
-          'customer_id': customerId,
-          'customer_name': customerName,
-          'customer_email': customerEmail,
-          'customer_phone': _sanitizePhone(customerPhone),
-        },
-        'order_meta': {
-          'notify_url': '',
-        },
-        'order_note': 'Evorra event posting fee — eventId: $eventId',
+        'amountRupees': amountRupees,
+        'customerId': customerId,
+        'customerEmail': customerEmail,
+        'customerPhone': customerPhone,
+        'customerName': customerName,
+        'eventId': eventId,
       }),
     );
 
     if (response.statusCode != 200) {
       throw Exception(
-        'Cashfree order creation failed (${response.statusCode}): ${response.body}',
+        'Vercel order creation failed (${response.statusCode}): ${response.body}',
       );
     }
 
     final data = jsonDecode(response.body) as Map<String, dynamic>;
 
     return CashfreeOrder(
-      orderId: data['order_id'] as String,
-      paymentSessionId: data['payment_session_id'] as String,
-      amount: amountRupees,
-      eventId: eventId,
+      orderId: data['orderId'] as String,
+      paymentSessionId: data['paymentSessionId'] as String,
+      amount: data['amount'] as int,
+      eventId: data['eventId'] as String,
     );
   }
 
@@ -169,20 +155,15 @@ class CashfreeService {
   Future<bool> verifyOrder(String orderId) async {
     try {
       final response = await http.get(
-        Uri.parse('${CashfreeConfig.orderApiBaseUrl}/orders/$orderId'),
-        headers: {
-          'x-api-version': CashfreeConfig.apiVersion,
-          'x-client-id': CashfreeConfig.appId,
-          'x-client-secret': CashfreeConfig.secretKey,
-        },
+        Uri.parse('${CashfreeConfig.orderApiBaseUrl}/api/cashfree/verify-order?orderId=$orderId'),
       );
 
       if (response.statusCode != 200) return false;
 
       final data = jsonDecode(response.body) as Map<String, dynamic>;
-      final status = data['order_status'] as String? ?? '';
-      debugPrint('[Cashfree] Order $orderId status: $status');
-      return status == 'PAID';
+      final isPaid = data['isPaid'] as bool? ?? false;
+      debugPrint('[Cashfree] Order $orderId isPaid: $isPaid');
+      return isPaid;
     } catch (e) {
       debugPrint('[Cashfree] Verify error: $e');
       return false;

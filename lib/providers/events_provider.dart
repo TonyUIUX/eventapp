@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'auth_provider.dart';
 import '../models/event_model.dart';
 import '../services/firestore_service.dart';
 import '../services/personalization_service.dart';
@@ -40,6 +41,10 @@ final filteredEventsProvider =
   final dateFilter = ref.watch(selectedDateFilterProvider);
   // Read affinities HERE (outside whenData) so dependency is tracked correctly
   final affinities = ref.watch(categoryAffinitiesProvider).value ?? {};
+  
+  // Read blocked users
+  final userProfile = ref.watch(currentUserProfileProvider).valueOrNull;
+  final blockedUsers = userProfile?.blockedUsers ?? const [];
 
   return eventsAsync.whenData((events) {
     // Use local time to avoid IST/UTC mismatch
@@ -63,6 +68,9 @@ final filteredEventsProvider =
     final filtered = events.where((event) {
       // Client-side guard: skip if not active/published
       if (!event.isActive || event.status != 'active') return false;
+      
+      // Blocked user guard
+      if (event.postedBy != null && blockedUsers.contains(event.postedBy)) return false;
 
       // Convert event date to local and strip time component
       final localEventDate = event.date.toLocal();

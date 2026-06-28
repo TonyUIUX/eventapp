@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/event_model.dart';
 import '../models/user_model.dart';
@@ -132,6 +133,16 @@ class FirestoreService {
       'reason': reason,
       'reportedAt': FieldValue.serverTimestamp(),
       'status': 'pending',
+    });
+  }
+
+  // Block User
+  Future<void> blockUser(String uidToBlock) async {
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+    if (currentUserId == null) return;
+
+    await _db.collection(FirestoreCollections.users).doc(currentUserId).update({
+      'blockedUsers': FieldValue.arrayUnion([uidToBlock]),
     });
   }
 }

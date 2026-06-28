@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../services/firestore_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:share_plus/share_plus.dart';
@@ -274,7 +275,7 @@ class _GlassHeaderAction extends StatelessWidget {
   }
 }
 
-class _GlassHeaderOverflow extends StatelessWidget {
+class _GlassHeaderOverflow extends ConsumerWidget {
   final bool isOwner;
   final bool isSuperAdmin;
   final EventModel event;
@@ -286,7 +287,7 @@ class _GlassHeaderOverflow extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return TapScale(
       child: Container(
         width: 40,
@@ -305,12 +306,98 @@ class _GlassHeaderOverflow extends StatelessWidget {
           ),
           onSelected: (value) async {
             if (value == 'report') {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text('Report submitted.', style: AppTextStyles.body.copyWith(color: AppColors.textPrimary)),
-                backgroundColor: AppColors.backgroundCard,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: AppColors.glassBorder)),
-              ));
+              final reason = await showDialog<String>(
+                context: context,
+                builder: (ctx) {
+                  final controller = TextEditingController();
+                  return AlertDialog(
+                    backgroundColor: AppColors.backgroundSheet,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.xl),
+                      side: const BorderSide(color: AppColors.glassBorder),
+                    ),
+                    title: Text('Report Event', style: AppTextStyles.heading2.copyWith(color: Colors.white)),
+                    content: TextField(
+                      controller: controller,
+                      style: AppTextStyles.body.copyWith(color: Colors.white),
+                      decoration: InputDecoration(
+                        hintText: 'Why are you reporting this event?',
+                        hintStyle: AppTextStyles.body.copyWith(color: AppColors.textTertiary),
+                        filled: true,
+                        fillColor: AppColors.backgroundBase,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      maxLines: 3,
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx, null),
+                        child: Text('Cancel', style: AppTextStyles.label.copyWith(color: Colors.white)),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+                        child: Text('Report', style: AppTextStyles.label.copyWith(color: AppColors.brandCoral)),
+                      ),
+                    ],
+                  );
+                },
+              );
+              
+              if (reason != null && reason.isNotEmpty && context.mounted) {
+                await FirestoreService.instance.submitReport(event.id, reason);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text('Report submitted. We will review it shortly.', style: AppTextStyles.body.copyWith(color: AppColors.textPrimary)),
+                    backgroundColor: AppColors.backgroundCard,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: AppColors.glassBorder)),
+                  ));
+                }
+              }
+            } else if (value == 'block') {
+              final confirmed = await showDialog<bool>(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  backgroundColor: AppColors.backgroundSheet,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.xl),
+                    side: const BorderSide(color: AppColors.glassBorder),
+                  ),
+                  title: Text('Block Organizer?', style: AppTextStyles.heading2.copyWith(color: Colors.white)),
+                  content: Text(
+                    'You will no longer see any events posted by this organizer. This action cannot be undone.',
+                    style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, false),
+                      child: Text('Cancel', style: AppTextStyles.label.copyWith(color: Colors.white)),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, true),
+                      child: Text('Block', style: AppTextStyles.label.copyWith(color: AppColors.error)),
+                    ),
+                  ],
+                ),
+              );
+              
+              if (confirmed == true && context.mounted && event.postedBy != null) {
+                await FirestoreService.instance.blockUser(event.postedBy!);
+                // Invalidate profile so the new block list is fetched
+                ref.invalidate(currentUserProfileProvider);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text('Organizer blocked.', style: AppTextStyles.body.copyWith(color: AppColors.textPrimary)),
+                    backgroundColor: AppColors.backgroundCard,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: AppColors.glassBorder)),
+                  ));
+                  Navigator.pop(context); // Go back to feed
+                }
+              }
             } else if (value == 'delete') {
               final confirmed = await showDialog<bool>(
                 context: context,
@@ -344,11 +431,16 @@ class _GlassHeaderOverflow extends StatelessWidget {
             }
           },
           itemBuilder: (context) => [
-            if (!isOwner && !isSuperAdmin)
+            if (!isOwner && !isSuperAdmin) ...[
               PopupMenuItem(
                 value: 'report',
                 child: Text('Report Event', style: AppTextStyles.body.copyWith(color: AppColors.error)),
               ),
+              PopupMenuItem(
+                value: 'block',
+                child: Text('Block Organizer', style: AppTextStyles.body.copyWith(color: AppColors.error)),
+              ),
+            ],
             if (isSuperAdmin)
               PopupMenuItem(
                 value: 'delete',

@@ -219,6 +219,65 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 hintText: 'https://',
                 keyboardType: TextInputType.url,
               ),
+              const SizedBox(height: AppSpacing.xxl),
+              
+              // ── Delete Account ──────────────────────────────────────────────
+              OutlinedButton(
+                onPressed: () async {
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      backgroundColor: AppColors.backgroundSheet,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppRadius.xl),
+                        side: const BorderSide(color: AppColors.glassBorder),
+                      ),
+                      title: Text('Delete Account?', style: AppTextStyles.heading2.copyWith(color: Colors.white)),
+                      content: Text(
+                        'This will permanently delete your account, profile, and all associated data. This action cannot be undone.',
+                        style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx, false),
+                          child: Text('Cancel', style: AppTextStyles.label.copyWith(color: Colors.white)),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx, true),
+                          child: Text('Delete', style: AppTextStyles.label.copyWith(color: AppColors.error)),
+                        ),
+                      ],
+                    ),
+                  );
+
+                  if (confirm == true && context.mounted) {
+                    try {
+                      setState(() => _isLoading = true);
+                      await ref.read(authServiceProvider).deleteAccount();
+                      if (context.mounted) {
+                        Navigator.of(context).popUntil((route) => route.isFirst);
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text(e.toString(), style: AppTextStyles.body.copyWith(color: AppColors.textPrimary)),
+                          backgroundColor: AppColors.error,
+                          behavior: SnackBarBehavior.floating,
+                        ));
+                      }
+                    } finally {
+                      if (mounted) setState(() => _isLoading = false);
+                    }
+                  }
+                },
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  side: const BorderSide(color: AppColors.error),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+                ),
+                child: Text('Delete Account', style: AppTextStyles.label.copyWith(color: AppColors.error)),
+              ),
+              const SizedBox(height: AppSpacing.xxl),
             ],
           ),
         ),

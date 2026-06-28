@@ -29,6 +29,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
 
   bool _isLoading = false;
   bool _obscurePassword = true;
+  bool _acceptedTerms = false;
   String? _errorMessage;
 
   // Track which tab is active — updated both when switching tabs and in build.
@@ -79,6 +80,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
 
   // ── Google Sign-In ────────────────────────────────────────────────────────
   Future<void> _handleGoogleSignIn() async {
+    if (!_acceptedTerms) {
+      _showError('You must accept the Terms of Service to continue.');
+      return;
+    }
+    
     _clearError();
     setState(() => _isLoading = true);
 
@@ -109,6 +115,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
 
   // ── Email Auth ────────────────────────────────────────────────────────────
   Future<void> _handleEmailAuth() async {
+    if (!_acceptedTerms) {
+      _showError('You must accept the Terms of Service to continue.');
+      return;
+    }
     if (!(_formKey.currentState?.validate() ?? false)) return;
     _clearError();
     setState(() => _isLoading = true);
@@ -258,7 +268,39 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
                           .copyWith(color: AppColors.textSecondary),
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.xxl),
+                  const SizedBox(height: AppSpacing.xl),
+
+                  // ── Terms Checkbox ──────────────────────────────────────────
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: Checkbox(
+                          value: _acceptedTerms,
+                          onChanged: (val) {
+                            setState(() => _acceptedTerms = val ?? false);
+                          },
+                          fillColor: WidgetStateProperty.resolveWith((states) {
+                            if (states.contains(WidgetState.selected)) {
+                              return AppColors.brandCoral;
+                            }
+                            return AppColors.glassSurface;
+                          }),
+                          side: const BorderSide(color: AppColors.glassBorder),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'I agree to the Terms of Service and Privacy Policy. I agree to not post objectionable content.',
+                          style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
 
                   // ── Google button ─────────────────────────────────────────
                   TapScale(

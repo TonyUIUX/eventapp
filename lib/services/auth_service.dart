@@ -222,6 +222,27 @@ class AuthService {
     await _auth.signOut();
   }
 
+  // ── Account Deletion ──────────────────────────────────────────────────────
+  Future<void> deleteAccount() async {
+    final user = currentUser;
+    if (user == null) return;
+
+    try {
+      // 1. Delete user document from Firestore
+      await _db.collection('users').doc(user.uid).delete();
+      
+      // 2. Delete the auth user
+      await user.delete();
+      
+      // 3. Disconnect from Google (if applicable)
+      if (!kIsWeb) {
+        await _googleSignIn.disconnect().catchError((_) => null);
+      }
+    } catch (e) {
+      throw Exception('Failed to delete account. Please try re-authenticating first.');
+    }
+  }
+
   // ── Firestore helpers ─────────────────────────────────────────────────────
   Future<void> _createUserProfile(User user, {String? nameOverride}) async {
     final uid = user.uid;
