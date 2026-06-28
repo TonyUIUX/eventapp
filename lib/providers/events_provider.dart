@@ -10,13 +10,13 @@ final firestoreServiceProvider = Provider<FirestoreService>(
 
 // Real-time stream from Firestore — auto-updates when admin changes events
 final eventsProvider = StreamProvider<List<EventModel>>((ref) {
-  final service = ref.read(firestoreServiceProvider);
+  final service = ref.watch(firestoreServiceProvider);
   return service.getEventsStream();
 });
 
 // Real-time stream of ALL events for a specific user (includes under_review, expired, etc.)
 final userEventsProvider = StreamProvider.family<List<EventModel>, String>((ref, uid) {
-  final service = ref.read(firestoreServiceProvider);
+  final service = ref.watch(firestoreServiceProvider);
   return service.getUserEventsStream(uid);
 });
 
@@ -38,6 +38,8 @@ final filteredEventsProvider =
   final eventsAsync = ref.watch(eventsProvider);
   final category = ref.watch(selectedCategoryProvider);
   final dateFilter = ref.watch(selectedDateFilterProvider);
+  // Read affinities HERE (outside whenData) so dependency is tracked correctly
+  final affinities = ref.watch(categoryAffinitiesProvider).value ?? {};
 
   return eventsAsync.whenData((events) {
     // Use local time to avoid IST/UTC mismatch
@@ -85,8 +87,6 @@ final filteredEventsProvider =
     
     // AI Personalization Sort (only sort if 'all' categories is selected)
     if (category == 'all') {
-      final affinities = ref.watch(categoryAffinitiesProvider).value ?? {};
-      
       filtered.sort((a, b) {
         // Priority 1: Featured events go first
         if (a.isFeatured && !b.isFeatured) return -1;
@@ -157,7 +157,7 @@ final searchResultsProvider =
   });
 });
 
-// ─── Trending events ──────────────────────────────────────────────────────
+// ─── Trending events — sorted by real totalViews ──────────────────────────
 final trendingEventsProvider = Provider<AsyncValue<List<EventModel>>>((ref) {
   return ref.watch(eventsProvider).whenData((events) {
     final today = DateTime.now().toLocal();
@@ -169,11 +169,8 @@ final trendingEventsProvider = Provider<AsyncValue<List<EventModel>>>((ref) {
       return !eDate.isBefore(todayDate);
     }).toList();
 
-    upcoming.sort((a, b) {
-      final countA = (a.id.hashCode.abs() % 40) + 12;
-      final countB = (b.id.hashCode.abs() % 40) + 12;
-      return countB.compareTo(countA);
-    });
+    // Sort by real totalViews (descending) — not a fake hashCode pseudo-sort
+    upcoming.sort((a, b) => b.totalViews.compareTo(a.totalViews));
 
     return upcoming.take(10).toList();
   });

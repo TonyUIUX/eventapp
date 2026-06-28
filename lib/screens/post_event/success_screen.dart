@@ -5,7 +5,7 @@ import '../../core/constants/app_text_styles.dart';
 import '../../core/constants/app_spacing.dart';
 import '../../core/widgets/gradient_button.dart';
 import '../../core/widgets/tap_scale.dart';
-import '../../main.dart';
+import '../../core/widgets/main_shell.dart';
 
 // lib/screens/post_event/success_screen.dart
 // Post success representation page — Evorra v3.1

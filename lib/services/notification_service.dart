@@ -12,6 +12,7 @@ class NotificationService {
         .collection('notifications')
         .where('userId', isEqualTo: userId)
         .orderBy('createdAt', descending: true)
+        .limit(50) // Prevent unbounded reads for users with many notifications
         .snapshots()
         .map((snap) => snap.docs.map(NotificationModel.fromFirestore).toList());
   }

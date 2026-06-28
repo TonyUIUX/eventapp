@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_text_styles.dart';
 import '../../core/constants/app_spacing.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/storage_service.dart';
+import '../../services/firestore_service.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key});
@@ -77,19 +77,35 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) return;
 
+    final name = _nameController.text.trim();
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Display name cannot be empty.',
+            style: AppTextStyles.body.copyWith(color: AppColors.textPrimary)),
+        backgroundColor: AppColors.backgroundCard,
+        behavior: SnackBarBehavior.floating,
+      ));
+      return;
+    }
+
     setState(() => _isLoading = true);
     try {
       final user = ref.read(authStateProvider).value;
       if (user == null) return;
 
-      await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
-        'displayName': _nameController.text.trim(),
-        'bio': _bioController.text.trim(),
-        'instagramHandle': _instagramController.text.trim(),
-        'website': _websiteController.text.trim(),
-        'photoUrl': _profileImageUrl,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
+      final profile = ref.read(currentUserProfileProvider).value;
+      if (profile == null) return;
+
+      // Route through FirestoreService — not directly via FirebaseFirestore.instance
+      await FirestoreService.instance.saveUserProfile(
+        profile.copyWith(
+          displayName: name,
+          bio: _bioController.text.trim(),
+          instagramHandle: _instagramController.text.trim(),
+          website: _websiteController.text.trim(),
+          photoUrl: _profileImageUrl,
+        ),
+      );
 
       if (mounted) {
         Navigator.pop(context);
@@ -97,7 +113,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Error saving profile: $e', style: AppTextStyles.body.copyWith(color: AppColors.textPrimary)),
+          content: Text('Error saving profile: $e',
+              style: AppTextStyles.body.copyWith(color: AppColors.textPrimary)),
           backgroundColor: AppColors.backgroundCard,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(

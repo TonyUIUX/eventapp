@@ -7,7 +7,7 @@ import '../../core/constants/app_text_styles.dart';
 import '../../core/constants/app_spacing.dart';
 import '../../core/widgets/gradient_button.dart';
 import '../../core/utils/app_router.dart';
-import '../../main.dart';
+import '../../core/widgets/main_shell.dart';
 
 // lib/screens/onboarding/onboarding_screen.dart
 // Dark glassmorphism Onboarding Screen — Evorra v3.1

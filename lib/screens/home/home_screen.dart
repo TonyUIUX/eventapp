@@ -56,8 +56,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         backgroundColor: AppColors.backgroundCard,
         onRefresh: () async {
                   ref.invalidate(eventsProvider);
-                  // Wait briefly for the stream to emit the new data
-                  await Future.delayed(const Duration(milliseconds: 800));
+                  // Wait for the stream to emit fresh data — not a fixed delay
+                  try {
+                    await ref.read(eventsProvider.future);
+                  } catch (_) {
+                    // Ignore errors during refresh (network offline etc.)
+                  }
                 },
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(),

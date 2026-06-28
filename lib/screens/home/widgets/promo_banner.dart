@@ -6,7 +6,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../providers/app_config_provider.dart';
 import '../../../core/utils/url_utils.dart';
 import '../../../core/widgets/tap_scale.dart';
-import '../../../main.dart';
+import '../../../providers/navigation_provider.dart';
 
 // lib/screens/home/widgets/promo_banner.dart
 // Dark glassmorphism promo banner — Evorra v3.1

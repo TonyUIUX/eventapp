@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -13,14 +15,18 @@ class PushNotificationService {
   PushNotificationService._();
 
   final FirebaseMessaging _fcm = FirebaseMessaging.instance;
-  final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _localNotifications =
+      FlutterLocalNotificationsPlugin();
   bool _initialized = false;
+
+  // Monotonic counter for unique local notification IDs — avoids hashCode collisions
+  int _notifIdCounter = 0;
 
   Future<void> init() async {
     if (_initialized) return;
 
     // Request permissions
-    NotificationSettings settings = await _fcm.requestPermission(
+    final settings = await _fcm.requestPermission(
       alert: true,
       badge: true,
       sound: true,
@@ -33,29 +39,33 @@ class PushNotificationService {
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
     const androidChannel = AndroidNotificationChannel(
-      'high_importance_channel', // id
-      'High Importance Notifications', // title
-      description: 'This channel is used for important notifications.', // description
+      'high_importance_channel',
+      'High Importance Notifications',
+      description: 'This channel is used for important notifications.',
       importance: Importance.high,
     );
 
     await _localNotifications
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(androidChannel);
 
-    await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+    await FirebaseMessaging.instance
+        .setForegroundNotificationPresentationOptions(
       alert: true,
       badge: true,
       sound: true,
     );
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      RemoteNotification? notification = message.notification;
-      AndroidNotification? android = message.notification?.android;
+      final notification = message.notification;
+      final android = message.notification?.android;
 
       if (notification != null && android != null && !kIsWeb) {
+        // Use a monotonic counter — avoids the hashCode collision issue
+        // where two notifications arriving close together get the same ID.
         _localNotifications.show(
-          id: notification.hashCode,
+          id: _nextNotifId(),
           title: notification.title,
           body: notification.body,
           notificationDetails: NotificationDetails(
@@ -70,10 +80,48 @@ class PushNotificationService {
       }
     });
 
-    // Handle token
-    final token = await _fcm.getToken();
-    debugPrint('FCM Token: $token');
+    // Fetch and store FCM token in Firestore so targeted push works
+    await _fetchAndStoreToken();
+
+    // Re-store token whenever it is refreshed (e.g. app reinstall)
+    _fcm.onTokenRefresh.listen((newToken) => _saveTokenToFirestore(newToken));
 
     _initialized = true;
+  }
+
+  int _nextNotifId() {
+    _notifIdCounter = (_notifIdCounter + 1) % 100000;
+    return _notifIdCounter;
+  }
+
+  Future<void> _fetchAndStoreToken() async {
+    try {
+      final token = await _fcm.getToken();
+      if (token != null) {
+        await _saveTokenToFirestore(token);
+      }
+    } catch (e) {
+      debugPrint('[PushNotification] Failed to fetch FCM token: $e');
+    }
+  }
+
+  Future<void> _saveTokenToFirestore(String token) async {
+    try {
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid == null) return; // Not signed in yet — will retry after auth
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .update({'fcmToken': token, 'fcmUpdatedAt': FieldValue.serverTimestamp()});
+      debugPrint('[PushNotification] FCM token stored for user $uid');
+    } catch (e) {
+      debugPrint('[PushNotification] Failed to store FCM token: $e');
+    }
+  }
+
+  /// Call this after the user signs in so the FCM token is associated
+  /// with their account immediately.
+  Future<void> onUserSignedIn() async {
+    await _fetchAndStoreToken();
   }
 }

@@ -13,7 +13,7 @@ import '../../services/storage_service.dart';
 import '../../core/auth_gate.dart';
 import '../../core/widgets/gradient_button.dart';
 import '../../core/utils/app_router.dart';
-import '../../main.dart'; // Add this import for MainShell
+import '../../core/widgets/main_shell.dart';
 import 'success_screen.dart';
 import '../../core/widgets/dark_shimmer.dart';
 // ── Instamojo additions (Razorpay imports above are untouched) ──────────────
@@ -114,6 +114,14 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
   @override
   void dispose() {
     _pageController.dispose();
+    // Clear Cashfree singleton callbacks — prevents stale callbacks from a
+    // previous payment session firing on the next screen instance.
+    try {
+      final cashfreeService = ref.read(cashfreeServiceProvider);
+      cashfreeService.clearCallbacks();
+    } catch (_) {
+      // Ignore if provider is unavailable during dispose
+    }
     super.dispose();
   }
 

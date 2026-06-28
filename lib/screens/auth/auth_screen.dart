@@ -22,9 +22,9 @@ class AuthScreen extends ConsumerStatefulWidget {
 class _AuthScreenState extends ConsumerState<AuthScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _nameController = TextEditingController();
+  late TextEditingController _emailController;
+  late TextEditingController _passwordController;
+  late TextEditingController _nameController;
   final _formKey = GlobalKey<FormState>();
 
   bool _isLoading = false;
@@ -37,6 +37,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen>
   @override
   void initState() {
     super.initState();
+    _emailController = TextEditingController();
+    _passwordController = TextEditingController();
+    _nameController = TextEditingController();
     _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(_onTabChanged);
   }

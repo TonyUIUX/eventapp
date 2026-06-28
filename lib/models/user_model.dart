@@ -82,4 +82,41 @@ class UserModel {
       'createdAt': Timestamp.fromDate(createdAt),
     };
   }
+
+  UserModel copyWith({
+    String? displayName,
+    String? email,
+    String? phone,
+    String? photoUrl,
+    String? bio,
+    String? instagramHandle,
+    String? website,
+    bool? isVerifiedOrg,
+    bool? isAdmin,
+    String? role,
+    int? totalEventsPosted,
+    int? totalViews,
+    int? followersCount,
+    int? followingCount,
+    DateTime? createdAt,
+  }) {
+    return UserModel(
+      uid: uid,
+      displayName: displayName ?? this.displayName,
+      email: email ?? this.email,
+      phone: phone ?? this.phone,
+      photoUrl: photoUrl ?? this.photoUrl,
+      bio: bio ?? this.bio,
+      instagramHandle: instagramHandle ?? this.instagramHandle,
+      website: website ?? this.website,
+      isVerifiedOrg: isVerifiedOrg ?? this.isVerifiedOrg,
+      isAdmin: isAdmin ?? this.isAdmin,
+      role: role ?? this.role,
+      totalEventsPosted: totalEventsPosted ?? this.totalEventsPosted,
+      totalViews: totalViews ?? this.totalViews,
+      followersCount: followersCount ?? this.followersCount,
+      followingCount: followingCount ?? this.followingCount,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
 }

@@ -13,12 +13,15 @@ class EventPostService {
     required List<String> imageUrls,
   }) async {
     final user = FirebaseAuth.instance.currentUser;
+    // Guard: never write an event with a null owner
+    if (user == null) throw StateError('Cannot create event: user is not signed in.');
+
     final now = DateTime.now();
     final expiryDate = now.add(Duration(days: eventDurationDays));
 
     final data = {
       ...eventData,
-      'postedBy': user?.uid,
+      'postedBy': user.uid,
       'status': 'pending_payment',
       'paymentStatus': 'pending',
       'imageUrl': imageUrls.isNotEmpty ? imageUrls.first : '',
@@ -105,6 +108,9 @@ class EventPostService {
     required List<String> imageUrls,
   }) async {
     final user = FirebaseAuth.instance.currentUser;
+    // Guard: never write an event with a null owner
+    if (user == null) throw StateError('Cannot submit event: user is not signed in.');
+
     final now = DateTime.now();
     final expiryDate = now.add(Duration(days: eventDurationDays));
 
@@ -113,7 +119,7 @@ class EventPostService {
 
     final data = {
       ...eventData,
-      'postedBy': user?.uid,
+      'postedBy': user.uid,
       'status': 'under_review',
       'paymentStatus': 'free_period',
       'imageUrl': imageUrls.isNotEmpty ? imageUrls.first : '',
@@ -128,12 +134,10 @@ class EventPostService {
     };
     batch.set(eventRef, data);
 
-    if (user != null) {
-      final userRef = _db.collection('users').doc(user.uid);
-      batch.update(userRef, {
-        'totalEventsPosted': FieldValue.increment(1),
-      });
-    }
+    final userRef = _db.collection('users').doc(user.uid);
+    batch.update(userRef, {
+      'totalEventsPosted': FieldValue.increment(1),
+    });
 
     await batch.commit();
   }
@@ -147,6 +151,9 @@ class EventPostService {
     int eventDurationDays = 365,
   }) async {
     final user = FirebaseAuth.instance.currentUser;
+    // Guard: never write an event with a null owner
+    if (user == null) throw StateError('Cannot submit event: user is not signed in.');
+
     final now = DateTime.now();
     final expiryDate = now.add(Duration(days: eventDurationDays));
 
@@ -155,7 +162,7 @@ class EventPostService {
 
     final data = {
       ...eventData,
-      'postedBy': user?.uid,
+      'postedBy': user.uid,
       'status': 'active',
       'paymentStatus': 'free',
       'imageUrl': imageUrls.isNotEmpty ? imageUrls.first : '',
@@ -170,12 +177,10 @@ class EventPostService {
     };
     batch.set(eventRef, data);
 
-    if (user != null) {
-      final userRef = _db.collection('users').doc(user.uid);
-      batch.update(userRef, {
-        'totalEventsPosted': FieldValue.increment(1),
-      });
-    }
+    final userRef = _db.collection('users').doc(user.uid);
+    batch.update(userRef, {
+      'totalEventsPosted': FieldValue.increment(1),
+    });
 
     await batch.commit();
   }

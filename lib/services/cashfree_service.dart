@@ -57,6 +57,13 @@ class CashfreeService {
     _gatewayService.setCallback(_handleSuccess, _handleError);
   }
 
+  /// Nullifies stored callbacks — call from the screen's dispose() to prevent
+  /// stale closures from a previous payment session triggering on a new screen.
+  void clearCallbacks() {
+    _onSuccess = null;
+    _onError = null;
+  }
+
   // ── Internal callbacks forwarded by the SDK ────────────────────────────────
   void _handleSuccess(String orderId) {
     debugPrint('[Cashfree] Payment success: $orderId');
@@ -137,7 +144,7 @@ class CashfreeService {
   /// Make sure [setCallback] was called first (in initState of your widget).
   void doPayment(CashfreeOrder order) {
     try {
-      final environment =
+      const environment =
           CashfreeConfig.useSandbox ? CFEnvironment.SANDBOX : CFEnvironment.PRODUCTION;
 
       final session = CFSessionBuilder()

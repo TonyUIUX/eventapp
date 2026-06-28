@@ -20,8 +20,17 @@ class FirestoreService {
         .map((snapshot) {
           final events = snapshot.docs
               .map((doc) {
-                try { return EventModel.fromFirestore(doc); }
-                catch (_) { return null; }
+                try {
+                  return EventModel.fromFirestore(doc);
+                } catch (e) {
+                  // Log parse failures so schema issues don't silently hide events
+                  assert(() {
+                    // ignore: avoid_print
+                    print('[FirestoreService] Failed to parse event ${doc.id}: $e');
+                    return true;
+                  }());
+                  return null;
+                }
               })
               .whereType<EventModel>()
               .toList();
@@ -39,8 +48,16 @@ class FirestoreService {
         .map((snapshot) {
           final events = snapshot.docs
               .map((doc) {
-                try { return EventModel.fromFirestore(doc); }
-                catch (_) { return null; }
+                try {
+                  return EventModel.fromFirestore(doc);
+                } catch (e) {
+                  assert(() {
+                    // ignore: avoid_print
+                    print('[FirestoreService] Failed to parse user event ${doc.id}: $e');
+                    return true;
+                  }());
+                  return null;
+                }
               })
               .whereType<EventModel>()
               .toList();
