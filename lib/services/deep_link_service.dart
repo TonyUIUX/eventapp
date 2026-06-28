@@ -10,6 +10,8 @@ import '../core/utils/app_router.dart';
 import '../core/constants/app_spacing.dart';
 import '../core/constants/app_text_styles.dart';
 
+final GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>();
+
 // Production-safe deep link service.
 // Uses a GlobalKey<NavigatorState> to avoid capturing BuildContext across
 // async gaps (use_build_context_synchronously lint).
@@ -28,8 +30,8 @@ class DeepLinkService {
   void init(BuildContext context, WidgetRef ref) {
     if (_initialized) return;
 
-    // Capture navigator key — safe across async gaps
-    _navigatorKey = Navigator.of(context).widget.key as GlobalKey<NavigatorState>?;
+    // Use explicitly defined global navigator key
+    _navigatorKey = globalNavigatorKey;
     _ref = ref;
 
     // Handle incoming links while app is running

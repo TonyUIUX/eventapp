@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -16,7 +17,7 @@ class Step3Media extends StatelessWidget {
   
   const Step3Media({super.key, required this.formData, required this.onUpdate});
 
-  Future<void> _pickImage() async {
+  Future<void> _pickImage(BuildContext context) async {
     try {
       final picked = await ImagePicker().pickImage(
         source: ImageSource.gallery,
@@ -31,6 +32,16 @@ class Step3Media extends StatelessWidget {
       onUpdate();
     } catch (e) {
       debugPrint('_pickImage error: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not access gallery. Please check permissions.', style: AppTextStyles.body.copyWith(color: AppColors.textPrimary)),
+            backgroundColor: AppColors.backgroundCard,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: AppColors.glassBorder)),
+          ),
+        );
+      }
     }
   }
 
@@ -47,7 +58,7 @@ class Step3Media extends StatelessWidget {
           
           if (formData.images.isEmpty)
             TapScale(
-              onTap: _pickImage,
+              onTap: () => _pickImage(context),
               child: CustomPaint(
                 painter: _DashedBorderPainter(color: AppColors.glassBorder),
                 child: Container(
@@ -79,7 +90,7 @@ class Step3Media extends StatelessWidget {
             )
           else
             TapScale(
-              onTap: _pickImage,
+              onTap: () => _pickImage(context),
               child: Container(
                 width: double.infinity,
                 height: MediaQuery.of(context).size.width * (9 / 16),
@@ -156,7 +167,7 @@ class Step3Media extends StatelessWidget {
                 }),
               if (formData.images.isNotEmpty && formData.images.length < 5)
                 TapScale(
-                  onTap: _pickImage,
+                  onTap: () => _pickImage(context),
                   child: Container(
                     width: 80,
                     height: 80,
@@ -178,7 +189,7 @@ class Step3Media extends StatelessWidget {
 }
 
 class _GalleryThumbnail extends StatelessWidget {
-  final dynamic imageBytes;
+  final Uint8List imageBytes;
   final VoidCallback onRemove;
 
   const _GalleryThumbnail({required this.imageBytes, required this.onRemove});

@@ -62,7 +62,8 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
       _formData.fromEventModel(widget.eventToEdit!);
       _isDraftLoaded = true;
     } else {
-      _initDraft();
+      // Delay until after first frame so showDialog has a valid context
+      WidgetsBinding.instance.addPostFrameCallback((_) => _initDraft());
     }
   }
 
@@ -220,7 +221,7 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
           await _initiateCashfreePayment(config, imageUrls);
         } else {
           // ── Existing Razorpay code — completely unchanged ───────────────
-          _initiateRazorpayPayment(config, imageUrls);
+          await _initiateRazorpayPayment(config, imageUrls);
         }
       } else {
         // Free submission
@@ -247,12 +248,16 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
   }
 
   // ── EXISTING Razorpay method — body untouched, only extracted ─────────────
-  void _initiateRazorpayPayment(AppConfigModel config, List<String> imageUrls) {
-    EventPostService.instance.createPendingEvent(
-      eventData: _formData.toMap(),
-      eventDurationDays: config.eventDurationDays,
-      imageUrls: imageUrls,
-    ).then((eventId) {
+  Future<void> _initiateRazorpayPayment(AppConfigModel config, List<String> imageUrls) async {
+    try {
+      final eventId = await EventPostService.instance.createPendingEvent(
+        eventData: _formData.toMap(),
+        eventDurationDays: config.eventDurationDays,
+        imageUrls: imageUrls,
+      );
+
+      if (!mounted) return;
+
       // 3. Start Payment
       PaymentService.instance.startPayment(
         amountPaise: config.postingFee,
@@ -263,12 +268,14 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
             paymentId: paymentId,
             postingFee: config.postingFee,
           );
-          await _onSuccess();
+          if (mounted) {
+            await _onSuccess();
+          }
         },
         onError: (error) async {
           await EventPostService.instance.markPaymentFailed(eventId);
-          setState(() => _isSubmitting = false);
           if (mounted) {
+            setState(() => _isSubmitting = false);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('Payment Failed: $error', style: AppTextStyles.body.copyWith(color: AppColors.textPrimary)), 
@@ -280,7 +287,11 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
           }
         },
       );
-    });
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
   }
 
   // ── NEW Instamojo method — parallel branch, zero Razorpay code touched ────
@@ -324,6 +335,9 @@ class _PostEventScreenState extends ConsumerState<PostEventScreen> {
                 postingFee: config.postingFee,
               );
               if (!mounted) return;
+              // Pop the WebView first
+              Navigator.pop(context);
+              // Then replace PostEventScreen with SuccessScreen
               Navigator.pushReplacement(
                 context,
                 SlideUpFadeRoute(page: const SuccessScreen()),

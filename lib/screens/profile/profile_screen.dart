@@ -56,7 +56,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> with SingleTicker
               color: AppColors.brandCoral,
               backgroundColor: AppColors.backgroundCard,
               onRefresh: () async {
-                // Refresh profile data
+                ref.invalidate(currentUserProfileProvider);
+                final uid = ref.read(authStateProvider).value?.uid;
+                if (uid != null) ref.invalidate(userEventsProvider(uid));
+                // Wait for the profile stream to re-emit
+                try {
+                  await ref.read(currentUserProfileProvider.future);
+                } catch (_) {}
               },
               child: CustomScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),

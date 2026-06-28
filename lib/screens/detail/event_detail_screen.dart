@@ -23,25 +23,35 @@ import '../post_event/post_event_screen.dart';
 // lib/screens/detail/event_detail_screen.dart
 // Dark glassmorphism detail screen — Evorra v3.1
 
-class EventDetailScreen extends ConsumerWidget {
+class EventDetailScreen extends ConsumerStatefulWidget {
   final EventModel event;
 
   const EventDetailScreen({super.key, required this.event});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<EventDetailScreen> createState() => _EventDetailScreenState();
+}
+
+class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Analytics (only track once)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AnalyticsService.instance.logEventView(widget.event.id, widget.event.title);
+      RatingService.trackDetailView();
+      PersonalizationService.instance.logCategoryView(widget.event.category);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final event = widget.event;
     final isSaved = ref.watch(savedEventIdsProvider).contains(event.id);
     final user = ref.watch(authStateProvider).value;
     final isSuperAdmin = ref.watch(isSuperAdminProvider);
     final isOwner = user != null && event.postedBy != null && user.uid == event.postedBy;
     final canEdit = isSuperAdmin || isOwner;
-
-    // Analytics (only track once, but this is simple)
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      AnalyticsService.instance.logEventView(event.id, event.title);
-      RatingService.trackDetailView();
-      PersonalizationService.instance.logCategoryView(event.category);
-    });
 
     return Scaffold(
       backgroundColor: AppColors.backgroundBase,

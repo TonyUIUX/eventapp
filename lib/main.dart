@@ -18,6 +18,7 @@ import 'services/push_notification_service.dart';
 import 'services/smart_cache_service.dart';
 import 'providers/app_config_provider.dart';
 import 'core/widgets/main_shell.dart';
+import 'services/deep_link_service.dart';
 
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -78,6 +79,7 @@ class EvorraApp extends ConsumerWidget {
     });
 
     return MaterialApp(
+      navigatorKey: globalNavigatorKey,
       title: 'Evorra',
       debugShowCheckedModeBanner: false,
       theme: AppTheme().darkTheme,

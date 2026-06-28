@@ -25,7 +25,7 @@ class NotificationsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final notifsAsync = ref.watch(notificationsProvider);
-    final user = ref.read(authStateProvider).value;
+    final user = ref.watch(authStateProvider).value;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundBase,
